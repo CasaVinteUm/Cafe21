@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
-#include <MessageLogger.h>
+#include <CoffeeMachineMessage.h>
 
 HardwareSerial CoffeeSerial(1);
 
@@ -9,8 +9,9 @@ HardwareSerial CoffeeSerial(1);
 
 #define MAX_MESSAGE_LENGTH 256
 
-// Create an instance of the MessageLogger
-MessageLogger logger;
+void readAndProcessMessages();
+void handleNewCoffeeMachineMessage(const CoffeeMachineMessage &message);
+uint16_t computeCRC16(const uint8_t *data, size_t length);
 
 void readAndLogMessages();
 
@@ -30,14 +31,16 @@ void setup()
 
 void loop()
 {
-  readAndLogMessages();
+  readAndProcessMessages();
 }
 
-// Function to read and log messages from the coffee machine
-void readAndLogMessages()
+// Function to read and process messages from the coffee machine
+void readAndProcessMessages()
 {
   static uint8_t messageBuffer[MAX_MESSAGE_LENGTH];
   static size_t messageIndex = 0;
+  static CoffeeMachineMessage lastMessage;
+  static bool hasLastMessage = false;
 
   while (CoffeeSerial.available())
   {
@@ -63,19 +66,62 @@ void readAndLogMessages()
     }
 
     // Check if we have received at least the minimum message length
-    if (messageIndex >= 4)
+    if (messageIndex >= 19)
     {
       // For simplicity, assume messages are fixed length
       // Adjust this as necessary based on your message structure
-      size_t messageLength = 19; // Example message length from your logs
+      size_t messageLength = 19; // Message length including checksum
       if (messageIndex >= messageLength)
       {
-        // Use the logger to log the message
-        logger.logMessage(Sender::CoffeeMachine, messageBuffer, messageLength);
+        // Verify checksum
+        // uint16_t receivedChecksum = (messageBuffer[messageLength - 2] << 8) | messageBuffer[messageLength - 1];
+        // uint16_t calculatedChecksum = computeCRC16(messageBuffer, messageLength - 2);
+
+        // if (receivedChecksum != calculatedChecksum)
+        // {
+        //   Serial.println("Checksum mismatch, ignoring message.");
+        // }
+        // else
+        // {
+        // Parse the message
+        CoffeeMachineMessage currentMessage(messageBuffer, messageLength);
+
+        // Compare with the last message
+        if (!hasLastMessage || currentMessage != lastMessage)
+        {
+          // New message detected, handle it
+          handleNewCoffeeMachineMessage(currentMessage);
+
+          // Update the last message
+          lastMessage = currentMessage;
+          hasLastMessage = true;
+        }
+        // }
 
         // Reset the buffer for the next message
         messageIndex = 0;
       }
     }
   }
+}
+
+// Function to handle new messages from the coffee machine
+void handleNewCoffeeMachineMessage(const CoffeeMachineMessage &message)
+{
+  Serial.println("New message from coffee machine:");
+  message.print();
+
+  // Here you can add code to handle the new message, e.g.,
+  // update display, trigger actions, etc.
+}
+
+// Function to compute CRC16-CCITT checksum
+uint16_t computeCRC16(const uint8_t *data, size_t length)
+{
+  uint16_t crc = 0; // Initial value
+  for (size_t i = 2; i < length - 2; i++)
+  {
+    crc += data[i];
+  }
+  return crc;
 }
