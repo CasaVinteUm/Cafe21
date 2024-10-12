@@ -46,6 +46,7 @@ void setup()
 void loop()
 {
   readAndProcessMessages();
+  CoffeeSerial.flush();
 
   // Check for user input from the Serial Monitor
   if (Serial.available())
@@ -125,8 +126,8 @@ void readAndProcessMessages()
     if (messageIndex >= 19)
     {
       CoffeeMachineMessage message(messageBuffer, 19);
-      coffeeController.updateState(message);
-      logger.logMessage(Sender::CoffeeMachine, messageBuffer, 19);
+      coffeeController.handleReceivedMessage(message);
+      // logger.logMessage(Sender::CoffeeMachine, messageBuffer, 19);
 
       messageIndex = 0;
     }

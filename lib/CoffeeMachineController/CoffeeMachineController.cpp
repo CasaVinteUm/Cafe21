@@ -1,33 +1,24 @@
 #include "CoffeeMachineController.h"
 
 CoffeeMachineController::CoffeeMachineController(HardwareSerial &serial)
-    : serialPort(serial)
+    : serialPort(serial), awaitingConfirmation(false), retryCount(0)
 {
-}
-
-void CoffeeMachineController::updateState(const CoffeeMachineMessage &message)
-{
-    stateMachine.updateState(message);
 }
 
 bool CoffeeMachineController::sendCommand(CoffeeMachineCommand command)
 {
-    if (stateMachine.canSendCommand(command))
-    {
-        sendCommandMessage(command);
-        Serial.println("Command sent successfully.");
-        return true;
-    }
-    else
+    if (!stateMachine.canSendCommand(command))
     {
         Serial.println("Command not allowed in the current state.");
         return false;
     }
-}
 
-CoffeeMachineState CoffeeMachineController::getCurrentState() const
-{
-    return stateMachine.getCurrentState();
+    lastCommandSent = command;
+    retryCount = 0;
+    awaitingConfirmation = true;
+
+    sendCommandMessage(command);
+    return true;
 }
 
 void CoffeeMachineController::sendCommandMessage(CoffeeMachineCommand command)
@@ -41,27 +32,29 @@ void CoffeeMachineController::sendCommandMessage(CoffeeMachineCommand command)
     // Message Type
     message[2] = 0x00;
 
-    // Common bytes based on tested commands
-    message[3] = 0x01; // Commonly 0x01
-    message[4] = 0x00; // May vary for Start command
-    message[5] = 0x00; // Always 0x00
-    message[6] = 0x02; // Always 0x02
-    message[7] = 0x00; // Varies based on command
-    message[8] = 0x00; // Always 0x00
-    message[9] = 0x00; // May vary for Start command
+    // Common bytes
+    message[3] = 0x01;
+    message[4] = 0x00;
+    message[5] = 0x00;
+    message[6] = 0x02;
+    message[7] = 0x00;
+    message[8] = 0x00;
+    message[9] = 0x00;
 
-    // Set command-specific bytes
+    // Command-specific bytes
     switch (command)
     {
     case CoffeeMachineCommand::Espresso:
         message[7] = 0x02; // Select Espresso
         message[10] = 0x19;
         message[11] = 0x0F;
+        beverageQty = stateMachine.getCurrentMessage().ledEspresso;
         break;
     case CoffeeMachineCommand::Coffee:
         message[7] = 0x08; // Select Coffee
         message[10] = 0x29;
         message[11] = 0x3E;
+        beverageQty = stateMachine.getCurrentMessage().ledCoffee;
         break;
     case CoffeeMachineCommand::HotWater:
         message[7] = 0x04; // Select Hot Water
@@ -96,24 +89,80 @@ void CoffeeMachineController::sendCommandMessage(CoffeeMachineCommand command)
         break;
     }
 
-    // // Compute checksum for bytes 0-9
-    // uint16_t checksum = computeChecksum(message, 10);
-
-    // // Insert checksum (big-endian)
-    // message[10] = (checksum >> 8) & 0xFF;
-    // message[11] = checksum & 0xFF;
-
     // Send the message
+    serialPort.write(message, 12);
+    Serial.println("Command sent, waiting for response...");
+
     serialPort.write(message, 12);
 }
 
-uint16_t CoffeeMachineController::computeChecksum(const uint8_t *data, size_t length)
+void CoffeeMachineController::handleReceivedMessage(const CoffeeMachineMessage &message)
 {
-    // Implement the correct checksum calculation based on the coffee machine's protocol
-    uint16_t sum = 0;
-    for (size_t i = 0; i < length; i++)
+    // Update the state machine with the new message
+    stateMachine.updateState(message);
+
+    // If we are awaiting confirmation, check if the command was applied
+    if (awaitingConfirmation)
     {
-        sum += data[i];
+        if (isCommandApplied(message))
+        {
+            Serial.println("Command applied successfully.");
+            awaitingConfirmation = false;
+            retryCount = 0;
+            beverageQty = 0;
+        }
+        else
+        {
+            unsigned long currentTime = millis();
+            if (currentTime - lastRetryTime >= retryInterval * retryCount)
+            {
+                // Retry sending the command if maximum retries not reached
+                retryCount++;
+                if (retryCount <= maxRetries)
+                {
+                    Serial.println("Command not applied, retrying...");
+                    sendCommandMessage(lastCommandSent);
+                    lastRetryTime = currentTime;
+                }
+                else
+                {
+                    Serial.println("Failed to apply command after maximum retries.");
+                    awaitingConfirmation = false;
+                    retryCount = 0;
+                }
+            }
+            else
+            {
+                Serial.println("Easy, cowboy...");
+            }
+        }
     }
-    return sum;
+}
+
+bool CoffeeMachineController::isCommandApplied(const CoffeeMachineMessage &message) const
+{
+    switch (lastCommandSent)
+    {
+    case CoffeeMachineCommand::Espresso:
+        return stateMachine.getCurrentState() == CoffeeMachineState::Selected && (message.ledEspresso != beverageQty);
+    case CoffeeMachineCommand::Coffee:
+        return stateMachine.getCurrentState() == CoffeeMachineState::Selected && (message.ledCoffee != beverageQty);
+    case CoffeeMachineCommand::HotWater:
+        return stateMachine.getCurrentState() == CoffeeMachineState::Selected && message.ledHotWater;
+    case CoffeeMachineCommand::Steam:
+        return stateMachine.getCurrentState() == CoffeeMachineState::Selected && message.ledSteam;
+    case CoffeeMachineCommand::Start:
+        // Check if brewing has started
+        return stateMachine.getCurrentState() == CoffeeMachineState::Brewing;
+    case CoffeeMachineCommand::Stop:
+        // Check if brewing has stopped
+        return stateMachine.getCurrentState() != CoffeeMachineState::Brewing;
+    default:
+        return false;
+    }
+}
+
+CoffeeMachineState CoffeeMachineController::getCurrentState() const
+{
+    return stateMachine.getCurrentState();
 }

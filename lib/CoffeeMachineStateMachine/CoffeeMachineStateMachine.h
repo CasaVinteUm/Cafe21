@@ -13,6 +13,7 @@ public:
     void updateState(const CoffeeMachineMessage &message);
     bool canSendCommand(CoffeeMachineCommand command) const;
     CoffeeMachineState getCurrentState() const;
+    CoffeeMachineMessage getCurrentMessage() const;
 
 private:
     CoffeeMachineState currentState;

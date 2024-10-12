@@ -96,6 +96,11 @@ CoffeeMachineState CoffeeMachineStateMachine::getCurrentState() const
     return currentState;
 }
 
+CoffeeMachineMessage CoffeeMachineStateMachine::getCurrentMessage() const
+{
+    return currentMessage;
+}
+
 bool CoffeeMachineStateMachine::isLoadingState(const CoffeeMachineMessage &message) const
 {
     // Define the loading patterns
