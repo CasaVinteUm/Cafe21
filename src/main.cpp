@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include <CoffeeMachineMessage.h>
+#include <CoffeeMachineController.h>
+#include <MessageLogger.h>
 
 HardwareSerial CoffeeSerial(1);
 
@@ -9,11 +11,10 @@ HardwareSerial CoffeeSerial(1);
 
 #define MAX_MESSAGE_LENGTH 256
 
-void readAndProcessMessages();
-void handleNewCoffeeMachineMessage(const CoffeeMachineMessage &message);
-uint16_t computeCRC16(const uint8_t *data, size_t length);
+CoffeeMachineController coffeeController(CoffeeSerial);
+MessageLogger logger;
 
-void readAndLogMessages();
+void readAndProcessMessages();
 
 void setup()
 {
@@ -27,26 +28,82 @@ void setup()
   // Initialize UART communication with the coffee machine
   CoffeeSerial.begin(115200, SERIAL_8N1, RX_PIN, TX_PIN);
   Serial.println("UART communication with coffee machine initialized.");
+
+  delay(1000);
+
+  Serial.println("ESP32 Coffee Machine Controller Starting...");
+  Serial.println("Enter commands to control the coffee machine:");
+  Serial.println("'e' or 'espresso' - Select Espresso");
+  Serial.println("'c' or 'coffee'   - Select Coffee");
+  Serial.println("'h' or 'hotwater' - Select Hot Water");
+  Serial.println("'s' or 'steam'    - Select Steam");
+  Serial.println("'start'           - Start Brewing");
+  Serial.println("'stop' or 'x'     - Stop Brewing");
+  Serial.println("'t' or 'strength' - Set Strength");
+  Serial.println("'q' or 'quantity' - Set Quantity");
 }
 
 void loop()
 {
   readAndProcessMessages();
+
+  // Check for user input from the Serial Monitor
+  if (Serial.available())
+  {
+    String input = Serial.readStringUntil('\n'); // Read until newline character
+    input.trim();                                // Remove any leading/trailing whitespace
+    input.toLowerCase();                         // Convert to lowercase for easy comparison
+
+    // Map input to commands
+    if (input == "e" || input == "espresso")
+    {
+      coffeeController.sendCommand(CoffeeMachineCommand::Espresso);
+    }
+    else if (input == "c" || input == "coffee")
+    {
+      coffeeController.sendCommand(CoffeeMachineCommand::Coffee);
+    }
+    else if (input == "h" || input == "hotwater")
+    {
+      coffeeController.sendCommand(CoffeeMachineCommand::HotWater);
+    }
+    else if (input == "s" || input == "steam")
+    {
+      coffeeController.sendCommand(CoffeeMachineCommand::Steam);
+    }
+    else if (input == "start" || input == "r")
+    {
+      coffeeController.sendCommand(CoffeeMachineCommand::Start);
+    }
+    else if (input == "stop" || input == "x")
+    {
+      coffeeController.sendCommand(CoffeeMachineCommand::Stop);
+    }
+    else if (input == "t" || input == "strength")
+    {
+      coffeeController.sendCommand(CoffeeMachineCommand::Strength);
+    }
+    else if (input == "q" || input == "quantity")
+    {
+      coffeeController.sendCommand(CoffeeMachineCommand::Quantity);
+    }
+    else
+    {
+      Serial.println("Unknown command. Please enter a valid command.");
+    }
+  }
 }
 
-// Function to read and process messages from the coffee machine
 void readAndProcessMessages()
 {
-  static uint8_t messageBuffer[MAX_MESSAGE_LENGTH];
+  static uint8_t messageBuffer[256];
   static size_t messageIndex = 0;
-  static CoffeeMachineMessage lastMessage;
-  static bool hasLastMessage = false;
 
   while (CoffeeSerial.available())
   {
     uint8_t incomingByte = CoffeeSerial.read();
 
-    // Look for the header
+    // Assemble the message as before
     if (messageIndex == 0 && incomingByte != 0xD5)
     {
       continue;
@@ -59,69 +116,19 @@ void readAndProcessMessages()
     {
       if (messageBuffer[1] != 0x55)
       {
-        // Invalid header, reset
         messageIndex = 0;
         continue;
       }
     }
 
-    // Check if we have received at least the minimum message length
+    // Assuming fixed message length of 19 bytes
     if (messageIndex >= 19)
     {
-      // For simplicity, assume messages are fixed length
-      // Adjust this as necessary based on your message structure
-      size_t messageLength = 19; // Message length including checksum
-      if (messageIndex >= messageLength)
-      {
-        // Verify checksum
-        // uint16_t receivedChecksum = (messageBuffer[messageLength - 2] << 8) | messageBuffer[messageLength - 1];
-        // uint16_t calculatedChecksum = computeCRC16(messageBuffer, messageLength - 2);
+      CoffeeMachineMessage message(messageBuffer, 19);
+      coffeeController.updateState(message);
+      logger.logMessage(Sender::CoffeeMachine, messageBuffer, 19);
 
-        // if (receivedChecksum != calculatedChecksum)
-        // {
-        //   Serial.println("Checksum mismatch, ignoring message.");
-        // }
-        // else
-        // {
-        // Parse the message
-        CoffeeMachineMessage currentMessage(messageBuffer, messageLength);
-
-        // Compare with the last message
-        if (!hasLastMessage || currentMessage != lastMessage)
-        {
-          // New message detected, handle it
-          handleNewCoffeeMachineMessage(currentMessage);
-
-          // Update the last message
-          lastMessage = currentMessage;
-          hasLastMessage = true;
-        }
-        // }
-
-        // Reset the buffer for the next message
-        messageIndex = 0;
-      }
+      messageIndex = 0;
     }
   }
-}
-
-// Function to handle new messages from the coffee machine
-void handleNewCoffeeMachineMessage(const CoffeeMachineMessage &message)
-{
-  Serial.println("New message from coffee machine:");
-  message.print();
-
-  // Here you can add code to handle the new message, e.g.,
-  // update display, trigger actions, etc.
-}
-
-// Function to compute CRC16-CCITT checksum
-uint16_t computeCRC16(const uint8_t *data, size_t length)
-{
-  uint16_t crc = 0; // Initial value
-  for (size_t i = 2; i < length - 2; i++)
-  {
-    crc += data[i];
-  }
-  return crc;
 }
