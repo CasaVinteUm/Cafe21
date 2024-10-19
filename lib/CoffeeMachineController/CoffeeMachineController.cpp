@@ -103,8 +103,14 @@ void CoffeeMachineController::sendCommandMessage(CoffeeMachineCommand command)
     // message[10] = (checksum >> 8) & 0xFF;
     // message[11] = checksum & 0xFF;
 
+#ifdef USE_I2C
+    Wire.beginTransmission(COFFEMACHINE_I2C_ADDR);
+    Wire.write(message, sizeof(message));
+    Wire.endTransmission();
+#else
     // Send the message
     serialPort.write(message, 12);
+#endif
 }
 
 uint16_t CoffeeMachineController::computeChecksum(const uint8_t *data, size_t length)

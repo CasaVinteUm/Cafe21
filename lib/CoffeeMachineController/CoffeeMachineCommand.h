@@ -10,7 +10,9 @@ enum class CoffeeMachineCommand
     Start,
     Stop,
     Strength,
-    Quantity
+    Quantity,
+    PowerOn,
+    RequestStatus
 };
 
 #endif // COFFEEMACHINECOMMAND_H

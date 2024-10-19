@@ -4,7 +4,9 @@
 #include <HardwareSerial.h>
 #include "CoffeeMachineStateMachine.h"
 #include "CoffeeMachineCommand.h"
-
+#ifdef USE_I2C
+ #include <Wire.h>
+#endif 
 class CoffeeMachineController
 {
 public:
