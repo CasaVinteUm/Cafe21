@@ -1,24 +1,35 @@
 #include "CoffeeMachineController.h"
 
+#ifdef USE_I2C
+CoffeeMachineController::CoffeeMachineController()
+{
+    Serial.printf("Starting controller I2C");
+}
+#else
 CoffeeMachineController::CoffeeMachineController(HardwareSerial &serial)
     : serialPort(serial)
 {
 }
+#endif
 
 void CoffeeMachineController::updateState(const CoffeeMachineMessage &message)
 {
     stateMachine.updateState(message);
 }
 
-bool CoffeeMachineController::sendCommand(CoffeeMachineCommand command)
+bool CoffeeMachineController::sendCommand(CoffeeMachineCommand command, byte destination)
 {
     if (stateMachine.canSendCommand(command))
     {
-        sendCommandMessage(command);
+        sendCommandMessage(command, destination);
         Serial.println("Command sent successfully.");
         return true;
     }
-    else
+    else if (destination == 3) {
+        sendCommandMessage(command, destination);
+        Serial.println("Command powerOn successfully sent.");
+        return true;
+    } else
     {
         Serial.println("Command not allowed in the current state.");
         return false;
@@ -30,7 +41,7 @@ CoffeeMachineState CoffeeMachineController::getCurrentState() const
     return stateMachine.getCurrentState();
 }
 
-void CoffeeMachineController::sendCommandMessage(CoffeeMachineCommand command)
+void CoffeeMachineController::sendCommandMessage(CoffeeMachineCommand command, byte destination = 0)
 {
     uint8_t message[12] = {0};
 
@@ -105,6 +116,7 @@ void CoffeeMachineController::sendCommandMessage(CoffeeMachineCommand command)
 
 #ifdef USE_I2C
     Wire.beginTransmission(COFFEMACHINE_I2C_ADDR);
+    Wire.write(destination);  // 0 to send to CoffeMachine, 1 to send to panel, 3 to powerOn    
     Wire.write(message, sizeof(message));
     Wire.endTransmission();
 #else

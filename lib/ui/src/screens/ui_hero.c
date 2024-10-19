@@ -108,7 +108,7 @@ void ui_hero_screen_init(void)
     lv_obj_set_style_pad_bottom(ui_errorPanel, 16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_erroIcon = lv_img_create(ui_errorPanel);
-    lv_img_set_src(ui_erroIcon, &ui_img_watersmall_png);
+    lv_img_set_src(ui_erroIcon, &ui_img_warnsmall_png);
     lv_obj_set_width(ui_erroIcon, LV_SIZE_CONTENT);   /// 48
     lv_obj_set_height(ui_erroIcon, LV_SIZE_CONTENT);    /// 48
     lv_obj_set_align(ui_erroIcon, LV_ALIGN_LEFT_MID);
@@ -119,7 +119,7 @@ void ui_hero_screen_init(void)
     lv_obj_set_width(ui_errorMessage, 540);
     lv_obj_set_height(ui_errorMessage, 20);
     lv_obj_set_align(ui_errorMessage, LV_ALIGN_TOP_RIGHT);
-    lv_label_set_text(ui_errorMessage, "Ops! O reservatório está vazio");
+    lv_label_set_text(ui_errorMessage, "Estamos inicializando.");
     lv_obj_set_style_text_color(ui_errorMessage, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_errorMessage, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_errorMessage, &ui_font_OpenSansSemiBold16, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -128,7 +128,7 @@ void ui_hero_screen_init(void)
     lv_obj_set_width(ui_errorDescription, 540);
     lv_obj_set_height(ui_errorDescription, 20);
     lv_obj_set_align(ui_errorDescription, LV_ALIGN_BOTTOM_RIGHT);
-    lv_label_set_text(ui_errorDescription, "Por favor, adicione água para que possamos preparar seu café");
+    lv_label_set_text(ui_errorDescription, "Aguarde...");
     lv_obj_set_style_text_color(ui_errorDescription, lv_color_hex(0x999999), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_errorDescription, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_errorDescription, &ui_font_OpenSansRegular16, LV_PART_MAIN | LV_STATE_DEFAULT);
