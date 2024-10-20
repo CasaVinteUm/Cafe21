@@ -29,10 +29,11 @@ lv_obj_t * ui_goBack_create(lv_obj_t * comp_parent)
     lv_imgbtn_set_src(cui_goBack, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &ui__temporary_image, NULL);
     lv_imgbtn_set_src(cui_goBack, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &ui__temporary_image, NULL);
     lv_imgbtn_set_src(cui_goBack, LV_IMGBTN_STATE_CHECKED_DISABLED, NULL, &ui__temporary_image, NULL);
-    lv_obj_set_height(cui_goBack, 48);
-    lv_obj_set_width(cui_goBack, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_x(cui_goBack, 24);
-    lv_obj_set_y(cui_goBack, 16);
+    lv_obj_set_width(cui_goBack, 30);
+    lv_obj_set_height(cui_goBack, 30);
+    lv_obj_set_x(cui_goBack, 12);
+    lv_obj_set_y(cui_goBack, 8);
+    lv_obj_set_style_transform_zoom(cui_goBack, 140, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_t ** children = lv_mem_alloc(sizeof(lv_obj_t *) * _UI_COMP_GOBACK_NUM);
     children[UI_COMP_GOBACK_GOBACK] = cui_goBack;

@@ -129,7 +129,7 @@ void ui_hero_screen_init(void)
     lv_label_set_text(ui_errorMessage, "Ops! Estamos inicializando.");
     lv_obj_set_style_text_color(ui_errorMessage, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_errorMessage, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_errorMessage, &ui_font_OpenSansRegular14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_errorMessage, &ui_font_OpenSansBold14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_errorDescription = lv_label_create(ui_errorPanel);
     lv_obj_set_width(ui_errorDescription, LV_SIZE_CONTENT);   /// 100
@@ -140,10 +140,9 @@ void ui_hero_screen_init(void)
     lv_label_set_text(ui_errorDescription, "Aguarde!\n");
     lv_obj_set_style_text_color(ui_errorDescription, lv_color_hex(0x999999), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_errorDescription, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_errorDescription, &ui_font_OpenSansRegular14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_errorDescription, &ui_font_OpenSansBold14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_logo21, ui_event_logo21, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_primaryButton, ui_event_primaryButton, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_hero, ui_event_hero_loading, LV_EVENT_SCREEN_LOADED, NULL);
 
 }

@@ -5,7 +5,7 @@
   "c_path": "/assets\\ui_font_LoraRegula24.c",
   "cfg_path": "/assets\\ui_font_LoraRegula24.fcfg",
   "size": 24,
-  "bpp": 4,
+  "bpp": 2,
   "letters": 0,
   "ranges": [
     "0x20-0xff"

@@ -12,8 +12,8 @@ void ui_preparing_screen_init(void)
     lv_obj_set_style_bg_opa(ui_preparing, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_ePanel1 = lv_obj_create(ui_preparing);
-    lv_obj_set_width(ui_ePanel1, 360);
-    lv_obj_set_height(ui_ePanel1, 372);
+    lv_obj_set_width(ui_ePanel1, lv_pct(50));
+    lv_obj_set_height(ui_ePanel1, lv_pct(83));
     lv_obj_set_align(ui_ePanel1, LV_ALIGN_CENTER);
     lv_obj_clear_flag(ui_ePanel1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_radius(ui_ePanel1, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -28,10 +28,10 @@ void ui_preparing_screen_init(void)
     lv_obj_set_style_pad_bottom(ui_ePanel1, 16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_btnCancel = lv_btn_create(ui_ePanel1);
-    lv_obj_set_width(ui_btnCancel, 328);
-    lv_obj_set_height(ui_btnCancel, 44);
+    lv_obj_set_width(ui_btnCancel, lv_pct(110));
+    lv_obj_set_height(ui_btnCancel, lv_pct(15));
     lv_obj_set_x(ui_btnCancel, 0);
-    lv_obj_set_y(ui_btnCancel, 277);
+    lv_obj_set_y(ui_btnCancel, 170);
     lv_obj_set_align(ui_btnCancel, LV_ALIGN_TOP_MID);
     lv_obj_add_flag(ui_btnCancel, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
     lv_obj_clear_flag(ui_btnCancel, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
@@ -50,29 +50,30 @@ void ui_preparing_screen_init(void)
     lv_label_set_text(ui_btnCancelLabel, "Cancelar");
     lv_obj_set_style_text_color(ui_btnCancelLabel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_btnCancelLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_btnCancelLabel, &ui_font_OpenSansBold20, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_btnCancelLabel, &ui_font_OpenSansBold14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_prepLabel = lv_label_create(ui_ePanel1);
     lv_obj_set_width(ui_prepLabel, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_prepLabel, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_prepLabel, 0);
-    lv_obj_set_y(ui_prepLabel, 169);
+    lv_obj_set_y(ui_prepLabel, 89);
     lv_obj_set_align(ui_prepLabel, LV_ALIGN_TOP_MID);
     lv_label_set_text(ui_prepLabel, "Saindo um\nExpresso to the Moon");
     lv_obj_set_style_text_color(ui_prepLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_prepLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui_prepLabel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_prepLabel, &ui_font_LoraRegula24, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_prepLabel, &ui_font_LoraRegular16, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_ePrepIcon = lv_img_create(ui_ePanel1);
     lv_img_set_src(ui_ePrepIcon, &ui_img_expressolarge_png);
-    lv_obj_set_width(ui_ePrepIcon, LV_SIZE_CONTENT);   /// 132
-    lv_obj_set_height(ui_ePrepIcon, LV_SIZE_CONTENT);    /// 132
+    lv_obj_set_width(ui_ePrepIcon, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_ePrepIcon, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_x(ui_ePrepIcon, 0);
-    lv_obj_set_y(ui_ePrepIcon, 32);
+    lv_obj_set_y(ui_ePrepIcon, -30);
     lv_obj_set_align(ui_ePrepIcon, LV_ALIGN_TOP_MID);
     lv_obj_add_flag(ui_ePrepIcon, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_ePrepIcon, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_img_set_zoom(ui_ePrepIcon, 150);
 
     ui_bcPrepIcon = lv_img_create(ui_ePanel1);
     lv_img_set_src(ui_bcPrepIcon, &ui_img_coffelarge_png);
@@ -87,10 +88,10 @@ void ui_preparing_screen_init(void)
     ui_Bar1 = lv_bar_create(ui_ePanel1);
     lv_bar_set_value(ui_Bar1, 25, LV_ANIM_OFF);
     lv_bar_set_start_value(ui_Bar1, 25, LV_ANIM_OFF);
-    lv_obj_set_width(ui_Bar1, 296);
-    lv_obj_set_height(ui_Bar1, 6);
+    lv_obj_set_height(ui_Bar1, 3);
+    lv_obj_set_width(ui_Bar1, lv_pct(95));
     lv_obj_set_x(ui_Bar1, 0);
-    lv_obj_set_y(ui_Bar1, 247);
+    lv_obj_set_y(ui_Bar1, lv_pct(76));
     lv_obj_set_align(ui_Bar1, LV_ALIGN_TOP_MID);
     lv_obj_set_style_bg_color(ui_Bar1, lv_color_hex(0x474747), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Bar1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);

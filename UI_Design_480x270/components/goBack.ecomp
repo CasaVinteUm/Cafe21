@@ -37,18 +37,18 @@
       "flags": 17,
       "strtype": "OBJECT/Position",
       "intarray": [
-        24,
-        16
+        12,
+        8
       ],
       "InheritedType": 7
     },
     {
       "nid": 886228583,
-      "flags": 19,
+      "flags": 17,
       "strtype": "OBJECT/Size",
       "intarray": [
-        1,
-        48
+        30,
+        30
       ],
       "InheritedType": 7
     },
@@ -264,7 +264,7 @@
     {
       "nid": 1670431206,
       "strtype": "IMGBUTTON/Button_state",
-      "strval": "PRESSED",
+      "strval": "RELEASED",
       "InheritedType": 3
     },
     {
@@ -305,7 +305,22 @@
     },
     {
       "part": "lv.PART.MAIN",
-      "childs": [],
+      "childs": [
+        {
+          "nid": 910482673,
+          "strtype": "_style/StyleState",
+          "strval": "DEFAULT",
+          "childs": [
+            {
+              "nid": -456693854,
+              "strtype": "_style/Transform_scale",
+              "integer": 140,
+              "InheritedType": 6
+            }
+          ],
+          "InheritedType": 1
+        }
+      ],
       "nid": -936455063,
       "strtype": "IMGBUTTON/Style_main",
       "strval": "lv.PART.MAIN, Rectangle, Image, Text, Transform",

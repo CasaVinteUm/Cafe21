@@ -33,11 +33,12 @@ SET(SOURCES components/ui_comp_goback.c
     fonts/ui_font_LoraRegula64.c
     fonts/ui_font_OpenSansBold14.c
     fonts/ui_font_OpenSansBold20.c
-    fonts/ui_font_OpenSansRegular14.c
     fonts/ui_font_OpenSansRegular16.c
     fonts/ui_font_OpenSansRegular20.c
     fonts/ui_font_OpenSansSemiBold14.c
     fonts/ui_font_OpenSansSemiBold16.c
-    fonts/ui_font_OpenSansSemiBold20.c)
+    fonts/ui_font_OpenSansSemiBold20.c
+    fonts/ui_font_LoraRegular16.c
+    fonts/ui_font_OpenSansRegular10.c)
 
 add_library(ui ${SOURCES})

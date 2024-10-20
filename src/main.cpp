@@ -229,19 +229,19 @@ void UIController(void *name){
         lv_obj_clear_flag(ui_errorPanel, LV_OBJ_FLAG_HIDDEN);
         lv_img_set_src(ui_erroIcon, &ui_img_watersmall_png); 
         lv_label_set_text(ui_errorMessage, "Ops! O reservatório está vazio");
-        lv_label_set_text(ui_errorDescription, "Por favor, adicione água para que possamos\npreparar seu café");
+        lv_label_set_text(ui_errorDescription, "Por favor, adicione água para que possamos preparar\no seu café");
       }
       if ( currentMessage.cleanTrash) {
         lv_obj_clear_flag(ui_errorPanel, LV_OBJ_FLAG_HIDDEN);        
         lv_img_set_src(ui_erroIcon, &ui_img_trashsmall_png); 
         lv_label_set_text(ui_errorMessage, "Hora de uma limpeza!");
-        lv_label_set_text(ui_errorDescription, "A borra de café precisa ser esvaziada\npara preparar o próximo pedido.");
+        lv_label_set_text(ui_errorDescription, "A borra de café precisa ser esvaziada para preparar\no próximo pedido.");
       }
       if ( currentMessage.generalWarning) {
         lv_obj_clear_flag(ui_errorPanel, LV_OBJ_FLAG_HIDDEN);
         lv_img_set_src(ui_erroIcon, &ui_img_warnsmall_png); 
         lv_label_set_text(ui_errorMessage, "Ops! Estamos com problemas!");
-        lv_label_set_text(ui_errorDescription, "Verifique se a bandeja está cheia\nou o café está no final.");
+        lv_label_set_text(ui_errorDescription, "Verifique se a bandeja está cheia ou o café está\nno final.");
       }     
       break;
     default:

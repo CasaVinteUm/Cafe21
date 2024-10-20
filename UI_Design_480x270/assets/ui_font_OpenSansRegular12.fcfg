@@ -1,0 +1,16 @@
+{
+  "codename": "OpenSansRegular12",
+  "ttf_path": "/assets/Lora-Regular.ttf",
+  "bin_path": "/assets\\ui_font_OpenSansRegular12.bin",
+  "c_path": "/assets\\ui_font_OpenSansRegular12.c",
+  "cfg_path": "/assets\\ui_font_OpenSansRegular12.fcfg",
+  "size": 12,
+  "bpp": 2,
+  "letters": 0,
+  "ranges": [
+    "0x20-0xff"
+  ],
+  "symbols": "",
+  "customparams": "--no-compress --no-prefilter",
+  "uploaded": false
+}

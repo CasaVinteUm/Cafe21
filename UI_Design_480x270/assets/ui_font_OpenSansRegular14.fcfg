@@ -1,11 +1,11 @@
 {
   "codename": "OpenSansRegular14",
-  "ttf_path": "/assets/OpenSans-Regular.ttf",
+  "ttf_path": "/assets/Lora-Regular.ttf",
   "bin_path": "/assets\\ui_font_OpenSansRegular14.bin",
   "c_path": "/assets\\ui_font_OpenSansRegular14.c",
   "cfg_path": "/assets\\ui_font_OpenSansRegular14.fcfg",
   "size": 14,
-  "bpp": 4,
+  "bpp": 2,
   "letters": 0,
   "ranges": [
     "0x20-0xff"
