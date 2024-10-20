@@ -39,7 +39,8 @@ uint8_t delay_lvgl = 0;
 #define MAX_MESSAGE_LENGTH 256
 
 #if CONFIG_FREERTOS_UNICORE
-  static const BaseType_t app_cpu = 0;
+  static const BaseType_t app_cpu0 = 0;
+  static const BaseType_t app_cpu1 = 0;
 #else
   static const BaseType_t app_cpu0 = 0;
   static const BaseType_t app_cpu1 = 1;
