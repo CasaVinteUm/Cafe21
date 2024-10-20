@@ -157,10 +157,18 @@ void CoffeeMachineController::sendCommandMessage(CoffeeMachineCommand command)
         message[11] = 0x32;
         break;
     case CoffeeMachineCommand::Strength:
-        // Set the appropriate byte for Strength if known
+        message[4] = 0x02;
+        message[6] = 0x09;
+        message[8] = 0x02;
+        message[10] = 0x0E;
+        message[11] = 0x28;
         break;
     case CoffeeMachineCommand::Quantity:
-        // Set the appropriate byte for Quantity if known
+        message[4] = 0x02;
+        message[6] = 0x09;
+        message[8] = 0x04;
+        message[10] = 0x27;
+        message[11] = 0x02;
         break;
     default:
         break;
