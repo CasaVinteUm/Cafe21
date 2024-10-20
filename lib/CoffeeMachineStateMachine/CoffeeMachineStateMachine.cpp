@@ -1,7 +1,7 @@
 #include "CoffeeMachineStateMachine.h"
 
 CoffeeMachineStateMachine::CoffeeMachineStateMachine()
-    : currentState(CoffeeMachineState::Loading)
+    : currentState(CoffeeMachineState::Off)
 {
 }
 
@@ -15,7 +15,17 @@ void CoffeeMachineStateMachine::updateState(const CoffeeMachineMessage &message)
 
     Serial.print("Current State: ");
 
-    if (isErrorState(message))
+    if (isWaitingForOnState(message))
+    {
+        currentState = CoffeeMachineState::WaitingForOn;
+        Serial.println("Waiting for On");
+    }
+    else if (isTurningOnState(message))
+    {
+        currentState = CoffeeMachineState::TurningOn;
+        Serial.println("Turning On");
+    }
+    else if (isErrorState(message))
     {
         currentState = CoffeeMachineState::Error;
         Serial.println("Error");
@@ -33,7 +43,49 @@ void CoffeeMachineStateMachine::updateState(const CoffeeMachineMessage &message)
     else if (isSelectedState(message, lastMessage))
     {
         currentState = CoffeeMachineState::Selected;
-        Serial.println("Selected");
+        Serial.print("Selected: ");
+        if (message.ledCoffee != 0x00)
+        {
+            Serial.print(message.ledCoffee);
+            Serial.print(" Cafe - ");
+        }
+        else if (message.ledEspresso != 0x00)
+        {
+            Serial.print(message.ledEspresso);
+            Serial.print(" Espresso - ");
+        }
+        else if (message.ledHotWater)
+        {
+            Serial.print("Cha - ");
+        }
+        else if (message.ledSteam)
+        {
+            Serial.print("Vapor");
+        }
+
+        if (message.ledCoffee != 0x00 || message.ledEspresso != 0x00 || message.ledHotWater)
+        {
+            Serial.print(message.quantity);
+            Serial.print(" ");
+        }
+
+        if (message.ledCoffee != 0x00 || message.ledEspresso != 0x00)
+        {
+            switch (message.coffeeStrength)
+            {
+            case 1:
+                Serial.print("fraco");
+                break;
+            case 2:
+                Serial.print("médio");
+                break;
+            case 3:
+                Serial.print("forte");
+                break;
+            }
+        }
+
+        Serial.println();
     }
     else if (isLoadingState(message))
     {
@@ -52,22 +104,28 @@ bool CoffeeMachineStateMachine::canSendCommand(CoffeeMachineCommand command) con
 {
     switch (currentState)
     {
+    case CoffeeMachineState::Off:
+        return command == CoffeeMachineCommand::Beep;
+    case CoffeeMachineState::WaitingForOn:
+        return command == CoffeeMachineCommand::On;
+    case CoffeeMachineState::TurningOn:
     case CoffeeMachineState::Loading:
-        // No commands can be sent during loading
-        return false;
+        return command == CoffeeMachineCommand::Status;
     case CoffeeMachineState::Ready:
         // Can send Espresso, Coffee, HotWater, Steam commands
         return command == CoffeeMachineCommand::Espresso ||
                command == CoffeeMachineCommand::Coffee ||
                command == CoffeeMachineCommand::HotWater ||
-               command == CoffeeMachineCommand::Steam;
+               command == CoffeeMachineCommand::Steam ||
+               command == CoffeeMachineCommand::Status;
     case CoffeeMachineState::Selected:
         // Can send Start, Strength, Quantity, or selection commands
         if (command == CoffeeMachineCommand::Start ||
             command == CoffeeMachineCommand::Espresso ||
             command == CoffeeMachineCommand::Coffee ||
             command == CoffeeMachineCommand::HotWater ||
-            command == CoffeeMachineCommand::Steam)
+            command == CoffeeMachineCommand::Steam ||
+            command == CoffeeMachineCommand::Status)
         {
             return true;
         }
@@ -77,15 +135,18 @@ bool CoffeeMachineStateMachine::canSendCommand(CoffeeMachineCommand command) con
             {
                 return command == CoffeeMachineCommand::Quantity;
             }
+            else if (lastMessage.ledCoffee != 0x00 || lastMessage.ledEspresso != 0x00)
+            {
+                return command == CoffeeMachineCommand::Quantity || command == CoffeeMachineCommand::Strength;
+            }
             else if (lastMessage.ledSteam)
                 return false;
         }
     case CoffeeMachineState::Brewing:
-        // Only Stop command can be sent
-        return command == CoffeeMachineCommand::Stop;
+        return command == CoffeeMachineCommand::Stop ||
+               command == CoffeeMachineCommand::Status;
     case CoffeeMachineState::Error:
-        // No commands can be sent during error state
-        return false;
+        return command == CoffeeMachineCommand::Status;
     default:
         return false;
     }
@@ -96,34 +157,19 @@ CoffeeMachineState CoffeeMachineStateMachine::getCurrentState() const
     return currentState;
 }
 
+bool CoffeeMachineStateMachine::isWaitingForOnState(const CoffeeMachineMessage &message) const
+{
+    return message.messageType == 0x01 && message.cleanTrash == 0x00 && message.coffeeStrength == 0x00 && message.generalWarning == 0x00 && message.ledCoffee == 0x00 && message.ledEspresso == 0x00 && message.ledHotWater == 0x00 && message.ledSteam == 0x00 && message.noWater == 0x00 && message.play == 0x00;
+}
+
+bool CoffeeMachineStateMachine::isTurningOnState(const CoffeeMachineMessage &message) const
+{
+    return message.messageType == 0x00 && message.cleanTrash == 0x00 && message.coffeeStrength == 0x00 && message.generalWarning == 0x00 && message.ledCoffee == 0x00 && message.ledEspresso == 0x00 && message.ledHotWater == 0x00 && message.ledSteam == 0x00 && message.noWater == 0x00 && message.play == 0x00;
+}
+
 bool CoffeeMachineStateMachine::isLoadingState(const CoffeeMachineMessage &message) const
 {
-    // Define the loading patterns
-    const uint8_t pattern1[4] = {0x07, 0x00, 0x03, 0x07};
-    const uint8_t pattern2[4] = {0x07, 0x07, 0x00, 0x03};
-    const uint8_t pattern3[4] = {0x03, 0x07, 0x07, 0x00};
-    const uint8_t pattern4[4] = {0x00, 0x03, 0x07, 0x07};
-
-    // Get the current LED statuses in the order 3, 5, 6, 4
-    uint8_t currentPattern[4] = {
-        message.ledEspresso, // LED 3
-        message.ledHotWater, // LED 5
-        message.ledSteam,    // LED 6
-        message.ledCoffee    // LED 4
-    };
-
-    // Check if currentPattern matches any of the loading patterns
-    if ((memcmp(currentPattern, pattern1, 4) == 0) ||
-        (memcmp(currentPattern, pattern2, 4) == 0) ||
-        (memcmp(currentPattern, pattern3, 4) == 0) ||
-        (memcmp(currentPattern, pattern4, 4) == 0))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return message.loading;
 }
 
 bool CoffeeMachineStateMachine::isReadyState(const CoffeeMachineMessage &message) const

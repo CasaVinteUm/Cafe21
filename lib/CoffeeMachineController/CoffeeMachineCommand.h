@@ -3,6 +3,8 @@
 
 enum class CoffeeMachineCommand
 {
+    Beep,
+    On,
     Espresso,
     Coffee,
     HotWater,
@@ -10,7 +12,8 @@ enum class CoffeeMachineCommand
     Start,
     Stop,
     Strength,
-    Quantity
+    Quantity,
+    Status
 };
 
 #endif // COFFEEMACHINECOMMAND_H

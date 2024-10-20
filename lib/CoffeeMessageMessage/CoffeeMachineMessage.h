@@ -30,6 +30,7 @@ public:
     bool cleanTrash;
     bool generalWarning;
     bool play;
+    bool loading;
 
     // Default constructor
     CoffeeMachineMessage();

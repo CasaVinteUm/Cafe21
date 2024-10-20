@@ -11,6 +11,7 @@ public:
     CoffeeMachineController(HardwareSerial &serial);
 
     void updateState(const CoffeeMachineMessage &message);
+    bool sendOnCommand();
     bool sendCommand(CoffeeMachineCommand command);
 
     CoffeeMachineState getCurrentState() const;
@@ -18,9 +19,10 @@ public:
 private:
     HardwareSerial &serialPort;
     CoffeeMachineStateMachine stateMachine;
+    bool waitingForOnState;
+    byte onStateCounter;
 
     void sendCommandMessage(CoffeeMachineCommand command);
-    uint16_t computeChecksum(const uint8_t *data, size_t length);
 };
 
 #endif // COFFEEMACHINECONTROLLER_H

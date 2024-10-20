@@ -3,6 +3,9 @@
 
 enum class CoffeeMachineState
 {
+    Off,
+    WaitingForOn,
+    TurningOn,
     Loading,
     Ready,
     Selected,

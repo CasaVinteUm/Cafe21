@@ -20,6 +20,8 @@ private:
     CoffeeMachineMessage lastMessage;
 
     // Helper functions
+    bool isWaitingForOnState(const CoffeeMachineMessage &message) const;
+    bool isTurningOnState(const CoffeeMachineMessage &message) const;
     bool isLoadingState(const CoffeeMachineMessage &message) const;
     bool isReadyState(const CoffeeMachineMessage &message) const;
     bool isSelectedState(const CoffeeMachineMessage &message, const CoffeeMachineMessage &lastMessage) const;
