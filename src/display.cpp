@@ -1,3 +1,4 @@
+#ifndef ESP32_NODISPLAY
 #include "display.h" 
 
 bool touchDevicesOnline = false;
@@ -179,3 +180,4 @@ void display_init(){
         lv_indev_drv_register(&indev_drv);
       }      
 }
+#endif

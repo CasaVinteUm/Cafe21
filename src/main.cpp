@@ -3,9 +3,11 @@
 #include <CoffeeMachineMessage.h>
 #include <CoffeeMachineController.h>
 #include <MessageLogger.h>
-#include "display.h"
 
- #include "ui.h"
+#ifndef ESP32_NODISPLAY
+  #include "display.h"
+  #include "ui.h"
+#endif
 
 #ifdef USE_I2C
   #include <Wire.h>
@@ -48,7 +50,10 @@ CoffeeMachineMessage currentMessage;
 
 void readAndProcessMessages();
 void runController(void *name);
+
+#ifndef ESP32_NODISPLAY
 void UIController(void *name);
+#endif
 
 void setup()
 {
@@ -57,20 +62,23 @@ void setup()
   {
     ; // Wait for Serial Monitor to initialize
   }
-
+ #ifndef ESP32_NODISPLAY
   display_init();
   delay(100);
 
   ui_init();
   lv_timer_handler();
   vTaskDelay(500 / portTICK_PERIOD_MS);
+ #else
+  Wire.begin(19,20);
+ #endif
 
  #ifdef USE_I2C
    pinMode(VCC_PIN, OUTPUT);
    pinMode(GND_PIN, INPUT);
    digitalWrite(VCC_PIN, HIGH);
    digitalWrite(GND_PIN, LOW);
-   Wire.begin();
+  // Wire.begin();
    scanner.Init();
    scanner.Scan();
    //Wire.onReceive(receiveEvent);
@@ -99,12 +107,13 @@ void setup()
   sprintf(name, "(%s)", "Controller");
   BaseType_t res1 = xTaskCreatePinnedToCore(runController, "Controller", 10000, (void*)name, 1, NULL, app_cpu1);
 
+ #ifndef ESP32_NODISPLAY
   // Task to deal with the UI, CPU 1
   char *nameui = (char*) malloc(32);
   sprintf(nameui, "(%s)", "UIController");
   BaseType_t res2 = xTaskCreatePinnedToCore(UIController, "UIController", 10000, (void*)nameui, 1, NULL, app_cpu1);
-  
   delay(100);
+ #endif 
   // Power on  the machine at start
   coffeeController.sendCommand(CoffeeMachineCommand::Start, 3);
 
@@ -119,7 +128,7 @@ void runController(void *name){
     if (Serial.available())
     {
       String input = Serial.readStringUntil('\n'); // Read until newline character
-      input.trim();                                // Remove any leading/trailing whitespace
+      input.trim();                               // Remove any leading/trailing whitespace
       input.toLowerCase();                         // Convert to lowercase for easy comparison
 
       // Map input to commands
@@ -172,6 +181,7 @@ void runController(void *name){
   } // Loop controller
 }
 
+#ifndef ESP32_NODISPLAY
 void UIController(void *name){
   // UI
   Serial.println("UI Controller started");
@@ -226,10 +236,10 @@ void UIController(void *name){
     vTaskDelay(delay_lvgl+1 / portTICK_PERIOD_MS); 
   }
 }
+#endif
 
 void loop()
-{  
-  
+{    
  //Serial.print("l");   
 }
 
