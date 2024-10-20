@@ -130,7 +130,7 @@ void runController(void *name){
     {
       String input = Serial.readStringUntil('\n'); // Read until newline character
       input.trim();                               // Remove any leading/trailing whitespace
-      input.toLowerCase();                         // Convert to lowercase for easy comparison
+      input.toLowerCase();                        // Convert to lowercase for easy comparison
 
       // Map input to commands
       if (input == "e" || input == "espresso")
@@ -210,8 +210,19 @@ void UIController(void *name){
     default:
       break;
     }
-
-    if (coffeeController.getCurrentState() == CoffeeMachineState::Error) {
+    // Handle UI state
+    switch (coffeeController.getCurrentState())
+    {
+    case CoffeeMachineState::Loading:
+      lv_obj_clear_flag(ui_errorPanel, LV_OBJ_FLAG_HIDDEN);
+      lv_obj_add_flag(ui_primaryButton, LV_OBJ_FLAG_HIDDEN);
+      lv_img_set_src(ui_erroIcon, &ui_img_warnsmall_png); 
+      lv_label_set_text(ui_errorMessage, "Maquina aquecendo...");
+      lv_label_set_text(ui_errorDescription, "Aguarde uns instantes.");
+      break;
+    case CoffeeMachineState::Error:     
+      lv_obj_add_flag(ui_primaryButton, LV_OBJ_FLAG_HIDDEN);
+      lv_obj_clear_flag(ui_errorPanel, LV_OBJ_FLAG_HIDDEN);
       if ( currentMessage.noWater) {
         lv_obj_clear_flag(ui_errorPanel, LV_OBJ_FLAG_HIDDEN);
         lv_img_set_src(ui_erroIcon, &ui_img_watersmall_png); 
@@ -229,11 +240,14 @@ void UIController(void *name){
         lv_img_set_src(ui_erroIcon, &ui_img_watersmall_png); 
         lv_label_set_text(ui_errorMessage, "Ops! Estamos com problemas!");
         lv_label_set_text(ui_errorDescription, "Verifique se a bandeja está cheia ou o café está no final.");
-      }
-    } else{
+      }     
+      break;
+    default:
+      lv_obj_clear_flag(ui_primaryButton, LV_OBJ_FLAG_HIDDEN);
       lv_obj_add_flag(ui_errorPanel, LV_OBJ_FLAG_HIDDEN);
-    } 
-    delay_lvgl = lv_timer_handler(); 
+      break;
+    }   
+    delay_lvgl = lv_timer_handler();
     vTaskDelay(delay_lvgl+1 / portTICK_PERIOD_MS); 
   }
 }
@@ -282,6 +296,7 @@ void readAndProcessMessages()
     if (messageIndex >= 19)
     {
       CoffeeMachineMessage message(messageBuffer, 19);
+      currentMessage = message;      
       coffeeController.updateState(message);
       logger.logMessage(Sender::CoffeeMachine, messageBuffer, 19);
       messageIndex = 0;
