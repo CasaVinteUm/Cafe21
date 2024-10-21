@@ -4,6 +4,7 @@
 #include <CoffeeMachineController.h>
 #include <MessageLogger.h>
 
+// HardwareSerial CoffeeSerial(1);
 #ifndef ESP32_NODISPLAY
   #include "display.h"
   #include "ui.h"
@@ -34,7 +35,12 @@
   CoffeeMachineController coffeeController(CoffeeSerial);
 #endif
 
+#ifndef ESP32C3
 uint8_t delay_lvgl = 0;
+#else
+#define TX_PIN 21 // Transmit pin: ESP32 TX -> Coffee Machine RX
+#define RX_PIN 20 // Receive pin:  ESP32 RX <- Coffee Machine TX
+#endif
 
 #define MAX_MESSAGE_LENGTH 256
 
@@ -46,6 +52,7 @@ uint8_t delay_lvgl = 0;
   static const BaseType_t app_cpu1 = 1;
 #endif
 
+CoffeeMachineController coffeeController(Serial1);
 MessageLogger logger;
 CoffeeMachineMessage currentMessage;
 
@@ -90,18 +97,23 @@ void setup()
   #endif
   Serial.println("ESP32 Coffee Machine Logger Starting...");
 
+  // Initialize UART communication with the coffee machine
+  Serial1.begin(115200, SERIAL_8N1, RX_PIN, TX_PIN);
+  Serial.println("UART communication with coffee machine initialized.");
+
   delay(1000);
 
   Serial.println("ESP32 Coffee Machine Controller Starting...");
   Serial.println("Enter commands to control the coffee machine:");
-  Serial.println("'e' or 'espresso' - Select Espresso");
-  Serial.println("'c' or 'coffee'   - Select Coffee");
-  Serial.println("'h' or 'hotwater' - Select Hot Water");
-  Serial.println("'s' or 'steam'    - Select Steam");
-  Serial.println("'start'           - Start Brewing");
-  Serial.println("'stop' or 'x'     - Stop Brewing");
-  Serial.println("'t' or 'strength' - Set Strength");
-  Serial.println("'q' or 'quantity' - Set Quantity");
+  Serial.println("'o' - Turn On");
+  Serial.println("'e' - Select Espresso");
+  Serial.println("'c' - Select Coffee");
+  Serial.println("'h' - Select Hot Water");
+  Serial.println("'s' - Select Steam");
+  Serial.println("'r' - Start Brewing");
+  Serial.println("'x' - Stop Brewing");
+  Serial.println("'t' - Set Strength");
+  Serial.println("'q' - Set Quantity");
 
    // Task to deal with the CoffeMachine Controller, CPU 0
   char *name = (char*) malloc(32);
@@ -133,35 +145,39 @@ void runController(void *name){
       input.toLowerCase();                        // Convert to lowercase for easy comparison
 
       // Map input to commands
-      if (input == "e" || input == "espresso")
+      if (input == "o")
+    {
+      coffeeController.sendOnCommand();
+    }
+    else if (input == "e")
       {
         coffeeController.sendCommand(CoffeeMachineCommand::Espresso, 0);
       }
-      else if (input == "c" || input == "coffee")
+      else if (input == "c")
       {
         coffeeController.sendCommand(CoffeeMachineCommand::Coffee, 0);
       }
-      else if (input == "h" || input == "hotwater")
+      else if (input == "h")
       {
         coffeeController.sendCommand(CoffeeMachineCommand::HotWater, 0);
       }
-      else if (input == "s" || input == "steam")
+      else if (input == "s")
       {
         coffeeController.sendCommand(CoffeeMachineCommand::Steam, 0);
       }
-      else if (input == "start" || input == "r")
+      else if (input == "r")
       {
         coffeeController.sendCommand(CoffeeMachineCommand::Start, 0);
       }
-      else if (input == "stop" || input == "x")
+      else if (input == "x")
       {
         coffeeController.sendCommand(CoffeeMachineCommand::Stop, 0);
       }
-      else if (input == "t" || input == "strength")
+      else if (input == "t")
       {
         coffeeController.sendCommand(CoffeeMachineCommand::Strength, 0);
       }
-      else if (input == "q" || input == "quantity")
+      else if (input == "q")
       {
         coffeeController.sendCommand(CoffeeMachineCommand::Quantity, 0);
       }
@@ -259,6 +275,12 @@ void UIController(void *name){
 void loop()
 {    
  //Serial.print("l");   
+  else
+  {
+    coffeeController.sendCommand(CoffeeMachineCommand::Status);
+  }
+
+  delay(10);
 }
 
 void readAndProcessMessages()
@@ -275,7 +297,7 @@ void readAndProcessMessages()
       continue;
     } // else Serial.print(incomingByte, HEX);
 #else
-  while (CoffeeSerial.available())
+  while (Serial1.available())
   {
     uint8_t incomingByte = CoffeeSerial.read();
 #endif
@@ -283,7 +305,14 @@ void readAndProcessMessages()
     if (messageIndex == 0 && incomingByte != 0xD5)
     {
       continue;
-    }    
+    }
+
+    // If we get a init header anywhere else, reset the buffer and fill up the message again
+    if (messageIndex != 0 && incomingByte == 0xD5)
+    {
+      messageIndex = 0;
+    }
+
     messageBuffer[messageIndex++] = incomingByte;
 
     // Check for header completion

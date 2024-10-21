@@ -7,7 +7,7 @@ CoffeeMachineController::CoffeeMachineController()
 }
 #else
 CoffeeMachineController::CoffeeMachineController(HardwareSerial &serial)
-    : serialPort(serial)
+    : serialPort(serial), waitingForOnState(false), onStateCounter(0)
 {
 }
 #endif
@@ -17,22 +17,72 @@ void CoffeeMachineController::updateState(const CoffeeMachineMessage &message)
     stateMachine.updateState(message);
 }
 
+bool CoffeeMachineController::sendOnCommand()
+{
+    if (!waitingForOnState)
+    {
+        waitingForOnState = true;
+    }
+    CoffeeMachineState currState = stateMachine.getCurrentState();
+
+    if (onStateCounter < 10 && currState == CoffeeMachineState::Off)
+    {
+        onStateCounter++;
+        sendCommandMessage(CoffeeMachineCommand::Beep);
+        return false;
+    }
+    else
+    {
+        if (currState == CoffeeMachineState::WaitingForOn)
+        {
+            sendCommandMessage(CoffeeMachineCommand::On);
+            return false;
+        }
+        else if (currState == CoffeeMachineState::TurningOn)
+        {
+            Serial.println("Setting waitingForOnState = false");
+            onStateCounter = 0;
+            waitingForOnState = false;
+            return true;
+        }
+        else
+        {
+            Serial.println("Unknown state while turning on");
+            return false;
+        }
+    }
+}
+
 bool CoffeeMachineController::sendCommand(CoffeeMachineCommand command, byte destination)
 {
-    if (stateMachine.canSendCommand(command))
+    if (waitingForOnState)
     {
-        sendCommandMessage(command, destination);
-        Serial.println("Command sent successfully.");
-        return true;
+        return sendOnCommand();
     }
-    else if (destination == 3) {
+    else
+    {
+        if (stateMachine.canSendCommand(command))
+        {
+            sendCommandMessage(command, destination);
+            if (command != CoffeeMachineCommand::Status)
+            {
+                Serial.println("Command sent successfully.");
+            }
+            return true;
+        }
+        else if (destination == 3) {
         sendCommandMessage(command, destination);
         Serial.println("Command powerOn successfully sent.");
         return true;
     } else
-    {
-        Serial.println("Command not allowed in the current state.");
-        return false;
+        {
+            CoffeeMachineState currState = stateMachine.getCurrentState();
+            if (currState != CoffeeMachineState::Off)
+            {
+                Serial.println("Command not allowed in the current state");
+            }
+            return false;
+        }
     }
 }
 
@@ -64,6 +114,26 @@ void CoffeeMachineController::sendCommandMessage(CoffeeMachineCommand command, b
     // Set command-specific bytes
     switch (command)
     {
+    case CoffeeMachineCommand::Beep:
+        message[2] = 0x0A;
+        message[4] = 0x02;
+        message[6] = 0x09;
+        message[10] = 0x09;
+        message[11] = 0x15;
+        break;
+    case CoffeeMachineCommand::On:
+        message[2] = 0x01;
+        message[4] = 0x02;
+        message[6] = 0x09;
+        message[10] = 0x22;
+        message[11] = 0x20;
+        break;
+    case CoffeeMachineCommand::Status:
+        message[4] = 0x02;
+        message[6] = 0x09;
+        message[10] = 0x16;
+        message[11] = 0x31;
+        break;
     case CoffeeMachineCommand::Espresso:
         message[7] = 0x02; // Select Espresso
         message[10] = 0x19;
@@ -98,21 +168,22 @@ void CoffeeMachineController::sendCommandMessage(CoffeeMachineCommand command, b
         message[11] = 0x32;
         break;
     case CoffeeMachineCommand::Strength:
-        // Set the appropriate byte for Strength if known
+        message[4] = 0x02;
+        message[6] = 0x09;
+        message[8] = 0x02;
+        message[10] = 0x0E;
+        message[11] = 0x28;
         break;
     case CoffeeMachineCommand::Quantity:
-        // Set the appropriate byte for Quantity if known
+        message[4] = 0x02;
+        message[6] = 0x09;
+        message[8] = 0x04;
+        message[10] = 0x27;
+        message[11] = 0x02;
         break;
     default:
         break;
     }
-
-    // // Compute checksum for bytes 0-9
-    // uint16_t checksum = computeChecksum(message, 10);
-
-    // // Insert checksum (big-endian)
-    // message[10] = (checksum >> 8) & 0xFF;
-    // message[11] = checksum & 0xFF;
 
 #ifdef USE_I2C
     Wire.beginTransmission(COFFEMACHINE_I2C_ADDR);
@@ -122,16 +193,4 @@ void CoffeeMachineController::sendCommandMessage(CoffeeMachineCommand command, b
 #else
     // Send the message
     serialPort.write(message, 12);
-#endif
-}
-
-uint16_t CoffeeMachineController::computeChecksum(const uint8_t *data, size_t length)
-{
-    // Implement the correct checksum calculation based on the coffee machine's protocol
-    uint16_t sum = 0;
-    for (size_t i = 0; i < length; i++)
-    {
-        sum += data[i];
-    }
-    return sum;
 }

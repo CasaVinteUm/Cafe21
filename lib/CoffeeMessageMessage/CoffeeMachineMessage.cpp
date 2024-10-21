@@ -13,6 +13,7 @@ CoffeeMachineMessage::CoffeeMachineMessage()
     cleanTrash = false;
     generalWarning = false;
     play = false;
+    loading = false;
 }
 
 CoffeeMachineMessage::CoffeeMachineMessage(const uint8_t *message, size_t length)
@@ -116,7 +117,10 @@ CoffeeMachineMessage::CoffeeMachineMessage(const uint8_t *message, size_t length
     // Byte 16: Play button status
     play = (message[16] == 0x07);
 
-    // Bytes 17-18: CRC (checksum), should have been verified before parsing
+    if (message[3] == 0x03 || message[4] == 0x03 || message[5] == 0x03 || message[6] == 0x03)
+    {
+        loading = true;
+    }
 }
 
 bool CoffeeMachineMessage::operator==(const CoffeeMachineMessage &other) const
