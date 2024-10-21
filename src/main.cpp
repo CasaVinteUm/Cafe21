@@ -110,6 +110,7 @@ void setup()
   Serial.println("'x' - Stop Brewing");
   Serial.println("'t' - Set Strength");
   Serial.println("'q' - Set Quantity");
+  Serial.println("'l' - Last message and status");
 
    // Task to deal with the CoffeMachine Controller, CPU 0
   char *name = (char*) malloc(32);
@@ -181,7 +182,7 @@ void runController(void *name){
       {
         coffeeController.sendCommand(CoffeeMachineCommand::Start, 3);
       }
-      else if (input == "status" || input == "d")
+      else if (input == "status" || input == "l")
       {
         currentMessage.print();
         Serial.printf("Current Status:%d\n", coffeeController.getCurrentState());
