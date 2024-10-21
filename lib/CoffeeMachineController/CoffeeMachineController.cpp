@@ -28,14 +28,14 @@ bool CoffeeMachineController::sendOnCommand()
     if (onStateCounter < 10 && currState == CoffeeMachineState::Off)
     {
         onStateCounter++;
-        sendCommandMessage(CoffeeMachineCommand::Beep);
+        sendCommandMessage(CoffeeMachineCommand::Beep, 0);
         return false;
     }
     else
     {
         if (currState == CoffeeMachineState::WaitingForOn)
         {
-            sendCommandMessage(CoffeeMachineCommand::On);
+            sendCommandMessage(CoffeeMachineCommand::On, 0);
             return false;
         }
         else if (currState == CoffeeMachineState::TurningOn)
@@ -193,4 +193,5 @@ void CoffeeMachineController::sendCommandMessage(CoffeeMachineCommand command, b
 #else
     // Send the message
     serialPort.write(message, 12);
+#endif
 }

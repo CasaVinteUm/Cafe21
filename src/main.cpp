@@ -4,10 +4,10 @@
 #include <CoffeeMachineController.h>
 #include <MessageLogger.h>
 
-// HardwareSerial CoffeeSerial(1);
 #ifndef ESP32_NODISPLAY
   #include "display.h"
   #include "ui.h"
+  uint8_t delay_lvgl = 0;
 #endif
 
 #ifdef USE_I2C
@@ -29,18 +29,18 @@
         }
   }
 #else
+  #ifndef ESP32C3   
+    #define TX_PIN 13 // Transmit pin: ESP32 TX -> Coffee Machine RX
+    #define RX_PIN 12 // Receive pin:  ESP32 RX <- Coffee Machine TX
+  #else
+    #define TX_PIN 21 // Transmit pin: ESP32 TX -> Coffee Machine RX
+    #define RX_PIN 20 // Receive pin:  ESP32 RX <- Coffee Machine TX
+  #endif
   HardwareSerial CoffeeSerial(1);
-  #define TX_PIN 13 // Transmit pin: ESP32 TX -> Coffee Machine RX
-  #define RX_PIN 12 // Receive pin:  ESP32 RX <- Coffee Machine TX
   CoffeeMachineController coffeeController(CoffeeSerial);
+  // CoffeeMachineController coffeeController(Serial1);
 #endif
 
-#ifndef ESP32C3
-uint8_t delay_lvgl = 0;
-#else
-#define TX_PIN 21 // Transmit pin: ESP32 TX -> Coffee Machine RX
-#define RX_PIN 20 // Receive pin:  ESP32 RX <- Coffee Machine TX
-#endif
 
 #define MAX_MESSAGE_LENGTH 256
 
@@ -52,7 +52,7 @@ uint8_t delay_lvgl = 0;
   static const BaseType_t app_cpu1 = 1;
 #endif
 
-CoffeeMachineController coffeeController(Serial1);
+
 MessageLogger logger;
 CoffeeMachineMessage currentMessage;
 
@@ -93,13 +93,9 @@ void setup()
   #else
    CoffeeSerial.begin(115200, SERIAL_8N1, RX_PIN, TX_PIN);
    // Initialize UART communication with the coffee machine
-   Serial.println("UART communication with coffee machine initialized.");
+   Serial.println("UART communication with coffee machine initialized.");     
   #endif
   Serial.println("ESP32 Coffee Machine Logger Starting...");
-
-  // Initialize UART communication with the coffee machine
-  Serial1.begin(115200, SERIAL_8N1, RX_PIN, TX_PIN);
-  Serial.println("UART communication with coffee machine initialized.");
 
   delay(1000);
 
@@ -146,10 +142,10 @@ void runController(void *name){
 
       // Map input to commands
       if (input == "o")
-    {
-      coffeeController.sendOnCommand();
-    }
-    else if (input == "e")
+      {
+        coffeeController.sendOnCommand();
+      } 
+      else if (input == "e")
       {
         coffeeController.sendCommand(CoffeeMachineCommand::Espresso, 0);
       }
@@ -274,12 +270,6 @@ void UIController(void *name){
 
 void loop()
 {    
- //Serial.print("l");   
-  else
-  {
-    coffeeController.sendCommand(CoffeeMachineCommand::Status);
-  }
-
   delay(10);
 }
 
@@ -297,7 +287,7 @@ void readAndProcessMessages()
       continue;
     } // else Serial.print(incomingByte, HEX);
 #else
-  while (Serial1.available())
+  while (CoffeeSerial.available())
   {
     uint8_t incomingByte = CoffeeSerial.read();
 #endif
@@ -331,6 +321,7 @@ void readAndProcessMessages()
       currentMessage = message;      
       coffeeController.updateState(message);
       logger.logMessage(Sender::CoffeeMachine, messageBuffer, 19);
+
       messageIndex = 0;
     }
   }
