@@ -34,29 +34,25 @@ void ui_event_choseCoffe(lv_event_t * e);
 lv_obj_t * ui_choseCoffe;
 void ui_event_ePanel(lv_event_t * e);
 lv_obj_t * ui_ePanel;
-void ui_event_primaryButton1(lv_event_t * e);
-lv_obj_t * ui_primaryButton1;
+void ui_event_secundaryButtonE(lv_event_t * e);
+lv_obj_t * ui_secundaryButtonE;
 lv_obj_t * ui_pbLabel1;
 lv_obj_t * ui_eTitle;
 lv_obj_t * ui_expressoOrder;
-lv_obj_t * ui_ePrLabel;
-lv_obj_t * ui_eConteiner;
+lv_obj_t * ui_sbeLabel;
 lv_obj_t * ui_eSats;
 lv_obj_t * ui_eReal;
-lv_obj_t * ui_eConteiner3;
+lv_obj_t * ui_goBack;
 void ui_event_cPanel(lv_event_t * e);
 lv_obj_t * ui_cPanel;
-void ui_event_primaryButton2(lv_event_t * e);
-lv_obj_t * ui_primaryButton2;
-lv_obj_t * ui_pbLabel2;
-lv_obj_t * ui_bcTitle;
+void ui_event_secundaryButtonC(lv_event_t * e);
+lv_obj_t * ui_secundaryButtonC;
+lv_obj_t * ui_sbcLabel;
+lv_obj_t * ui_cTitle1;
 lv_obj_t * ui_coffeOrder;
 lv_obj_t * ui_cPrLabel;
-lv_obj_t * ui_cConteiner;
 lv_obj_t * ui_cSats;
 lv_obj_t * ui_cReal;
-lv_obj_t * ui_cConteiner2;
-lv_obj_t * ui_goBack;
 
 
 // SCREEN: ui_payment
@@ -74,14 +70,13 @@ lv_obj_t * ui_goBack2;
 void ui_preparing_screen_init(void);
 void ui_event_preparing(lv_event_t * e);
 lv_obj_t * ui_preparing;
-lv_obj_t * ui_ePanel1;
+lv_obj_t * ui_prepPanel;
 void ui_event_btnCancel(lv_event_t * e);
 lv_obj_t * ui_btnCancel;
 lv_obj_t * ui_btnCancelLabel;
 lv_obj_t * ui_prepLabel;
-lv_obj_t * ui_ePrepIcon;
-lv_obj_t * ui_bcPrepIcon;
-lv_obj_t * ui_Bar1;
+lv_obj_t * ui_PrepIcon;
+lv_obj_t * ui_barBrew;
 
 
 // SCREEN: ui_success
@@ -90,13 +85,13 @@ void ui_event_success(lv_event_t * e);
 lv_obj_t * ui_success;
 void ui_event_goBack3(lv_event_t * e);
 lv_obj_t * ui_goBack3;
-lv_obj_t * ui_ePanel2;
-void ui_event_btnCancel1(lv_event_t * e);
-lv_obj_t * ui_btnCancel1;
-lv_obj_t * ui_btnCancelLabel1;
-lv_obj_t * ui_prepLabel1;
-lv_obj_t * ui_ePrepIcon1;
 lv_obj_t * ui_logoSuccess;
+lv_obj_t * ui_sPanel;
+void ui_event_btnSCancel(lv_event_t * e);
+lv_obj_t * ui_btnSCancel;
+lv_obj_t * ui_btnSCancelLabel;
+lv_obj_t * ui_sLabel;
+lv_obj_t * ui_sIcon;
 lv_obj_t * ui____initial_actions0;
 const lv_img_dsc_t * ui_imgset_logo[1] = {&ui_img_logo21_png};
 
@@ -151,7 +146,7 @@ void ui_event_ePanel(lv_event_t * e)
         _ui_screen_change(&ui_payment, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_payment_screen_init);
     }
 }
-void ui_event_primaryButton1(lv_event_t * e)
+void ui_event_secundaryButtonE(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
@@ -168,7 +163,7 @@ void ui_event_cPanel(lv_event_t * e)
         _ui_screen_change(&ui_payment, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_payment_screen_init);
     }
 }
-void ui_event_primaryButton2(lv_event_t * e)
+void ui_event_secundaryButtonC(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
@@ -235,7 +230,7 @@ void ui_event_goBack3(lv_event_t * e)
         _ui_screen_change(&ui_hero, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_hero_screen_init);
     }
 }
-void ui_event_btnCancel1(lv_event_t * e)
+void ui_event_btnSCancel(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);

@@ -51,29 +51,25 @@ void ui_event_choseCoffe(lv_event_t * e);
 extern lv_obj_t * ui_choseCoffe;
 void ui_event_ePanel(lv_event_t * e);
 extern lv_obj_t * ui_ePanel;
-void ui_event_primaryButton1(lv_event_t * e);
-extern lv_obj_t * ui_primaryButton1;
+void ui_event_secundaryButtonE(lv_event_t * e);
+extern lv_obj_t * ui_secundaryButtonE;
 extern lv_obj_t * ui_pbLabel1;
 extern lv_obj_t * ui_eTitle;
 extern lv_obj_t * ui_expressoOrder;
-extern lv_obj_t * ui_ePrLabel;
-extern lv_obj_t * ui_eConteiner;
+extern lv_obj_t * ui_sbeLabel;
 extern lv_obj_t * ui_eSats;
 extern lv_obj_t * ui_eReal;
-extern lv_obj_t * ui_eConteiner3;
+extern lv_obj_t * ui_goBack;
 void ui_event_cPanel(lv_event_t * e);
 extern lv_obj_t * ui_cPanel;
-void ui_event_primaryButton2(lv_event_t * e);
-extern lv_obj_t * ui_primaryButton2;
-extern lv_obj_t * ui_pbLabel2;
-extern lv_obj_t * ui_bcTitle;
+void ui_event_secundaryButtonC(lv_event_t * e);
+extern lv_obj_t * ui_secundaryButtonC;
+extern lv_obj_t * ui_sbcLabel;
+extern lv_obj_t * ui_cTitle1;
 extern lv_obj_t * ui_coffeOrder;
 extern lv_obj_t * ui_cPrLabel;
-extern lv_obj_t * ui_cConteiner;
 extern lv_obj_t * ui_cSats;
 extern lv_obj_t * ui_cReal;
-extern lv_obj_t * ui_cConteiner2;
-extern lv_obj_t * ui_goBack;
 // SCREEN: ui_payment
 void ui_payment_screen_init(void);
 void ui_event_payment(lv_event_t * e);
@@ -87,27 +83,26 @@ extern lv_obj_t * ui_goBack2;
 void ui_preparing_screen_init(void);
 void ui_event_preparing(lv_event_t * e);
 extern lv_obj_t * ui_preparing;
-extern lv_obj_t * ui_ePanel1;
+extern lv_obj_t * ui_prepPanel;
 void ui_event_btnCancel(lv_event_t * e);
 extern lv_obj_t * ui_btnCancel;
 extern lv_obj_t * ui_btnCancelLabel;
 extern lv_obj_t * ui_prepLabel;
-extern lv_obj_t * ui_ePrepIcon;
-extern lv_obj_t * ui_bcPrepIcon;
-extern lv_obj_t * ui_Bar1;
+extern lv_obj_t * ui_PrepIcon;
+extern lv_obj_t * ui_barBrew;
 // SCREEN: ui_success
 void ui_success_screen_init(void);
 void ui_event_success(lv_event_t * e);
 extern lv_obj_t * ui_success;
 void ui_event_goBack3(lv_event_t * e);
 extern lv_obj_t * ui_goBack3;
-extern lv_obj_t * ui_ePanel2;
-void ui_event_btnCancel1(lv_event_t * e);
-extern lv_obj_t * ui_btnCancel1;
-extern lv_obj_t * ui_btnCancelLabel1;
-extern lv_obj_t * ui_prepLabel1;
-extern lv_obj_t * ui_ePrepIcon1;
 extern lv_obj_t * ui_logoSuccess;
+extern lv_obj_t * ui_sPanel;
+void ui_event_btnSCancel(lv_event_t * e);
+extern lv_obj_t * ui_btnSCancel;
+extern lv_obj_t * ui_btnSCancelLabel;
+extern lv_obj_t * ui_sLabel;
+extern lv_obj_t * ui_sIcon;
 extern lv_obj_t * ui____initial_actions0;
 
 
@@ -115,21 +110,29 @@ LV_IMG_DECLARE(ui__temporary_image);
 LV_IMG_DECLARE(ui_img_logo21_png);    // assets/logo21.png
 LV_IMG_DECLARE(ui_img_configsmall_png);    // assets/configSmall.png
 LV_IMG_DECLARE(ui_img_watersmall_png);    // assets/waterSmall.png
-LV_IMG_DECLARE(ui_img_expressolarge_png);    // assets/expressoLarge.png
-LV_IMG_DECLARE(ui_img_coffelarge_png);    // assets/coffeLarge.png
+LV_IMG_DECLARE(ui_img_expresso_png);    // assets/Expresso.png
 LV_IMG_DECLARE(ui_img_chevronsmall_png);    // assets/chevronSmall.png
+LV_IMG_DECLARE(ui_img_coffe_png);    // assets/Coffe.png
 LV_IMG_DECLARE(ui_img_qr_code_png);    // assets/QR Code.png
 LV_IMG_DECLARE(ui_img_exitsmall_png);    // assets/exitSmall.png
+LV_IMG_DECLARE(ui_img_check_png);    // assets/Check.png
 LV_IMG_DECLARE(ui_img_checklarge_png);    // assets/checkLarge.png
+LV_IMG_DECLARE(ui_img_coffelarge_png);    // assets/coffeLarge.png
+LV_IMG_DECLARE(ui_img_expressolarge_png);    // assets/expressoLarge.png
+LV_IMG_DECLARE(ui_img_hose_png);    // assets/hose.png
 LV_IMG_DECLARE(ui_img_hoselarge_png);    // assets/hoseLarge.png
 LV_IMG_DECLARE(ui_img_minussmall_png);    // assets/minusSmall.png
 LV_IMG_DECLARE(ui_img_plussmall_png);    // assets/plusSmall.png
-LV_IMG_DECLARE(ui_img_419703364);    // assets/Property 1=Wi-Fi.png
+LV_IMG_DECLARE(ui_img_shower_png);    // assets/Shower.png
 LV_IMG_DECLARE(ui_img_showerlarge_png);    // assets/showerLarge.png
 LV_IMG_DECLARE(ui_img_toogleoff_png);    // assets/toogleOff.png
 LV_IMG_DECLARE(ui_img_toogleon_png);    // assets/toogleOn.png
 LV_IMG_DECLARE(ui_img_trashsmall_png);    // assets/trashSmall.png
+LV_IMG_DECLARE(ui_img_warningsmall_png);    // assets/warningSmall.png
 LV_IMG_DECLARE(ui_img_warnsmall_png);    // assets/warnSmall.png
+LV_IMG_DECLARE(ui_img_1837598647);    // assets/Wi-Fi.png
+LV_IMG_DECLARE(ui_img_wifismall_png);    // assets/wifiSmall.png
+LV_IMG_DECLARE(ui_img_x_png);    // assets/X.png
 LV_IMG_DECLARE(ui_img_xlarge_png);    // assets/xLarge.png
 
 
@@ -137,16 +140,21 @@ LV_IMG_DECLARE(ui_img_xlarge_png);    // assets/xLarge.png
 LV_FONT_DECLARE(ui_font_LoraRegula24);
 LV_FONT_DECLARE(ui_font_LoraRegula40);
 LV_FONT_DECLARE(ui_font_LoraRegula64);
+LV_FONT_DECLARE(ui_font_LoraRegular14);
+LV_FONT_DECLARE(ui_font_LoraRegular16);
+LV_FONT_DECLARE(ui_font_LoraRegular20);
+LV_FONT_DECLARE(ui_font_LoraRegular36);
 LV_FONT_DECLARE(ui_font_OpenSansBold14);
 LV_FONT_DECLARE(ui_font_OpenSansBold20);
+LV_FONT_DECLARE(ui_font_OpenSansRegular10);
+LV_FONT_DECLARE(ui_font_OpenSansRegular12);
 LV_FONT_DECLARE(ui_font_OpenSansRegular14);
 LV_FONT_DECLARE(ui_font_OpenSansRegular16);
 LV_FONT_DECLARE(ui_font_OpenSansRegular20);
+LV_FONT_DECLARE(ui_font_OpenSansSemiBold12);
 LV_FONT_DECLARE(ui_font_OpenSansSemiBold14);
 LV_FONT_DECLARE(ui_font_OpenSansSemiBold16);
 LV_FONT_DECLARE(ui_font_OpenSansSemiBold20);
-LV_FONT_DECLARE(ui_font_LoraRegular16);
-LV_FONT_DECLARE(ui_font_OpenSansRegular10);
 
 
 

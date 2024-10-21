@@ -14,36 +14,34 @@ void ui_payment_screen_init(void)
     ui_pagueSubLabel = lv_label_create(ui_payment);
     lv_obj_set_width(ui_pagueSubLabel, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_pagueSubLabel, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_pagueSubLabel, 0);
-    lv_obj_set_y(ui_pagueSubLabel, lv_pct(77));
-    lv_obj_set_align(ui_pagueSubLabel, LV_ALIGN_TOP_MID);
+    lv_obj_set_x(ui_pagueSubLabel, 12);
+    lv_obj_set_y(ui_pagueSubLabel, -20);
+    lv_obj_set_align(ui_pagueSubLabel, LV_ALIGN_BOTTOM_LEFT);
     lv_label_set_text(ui_pagueSubLabel, "Seu café será minerado em segundos,\napós a confirmação do pagamento. ");
     lv_obj_set_style_text_color(ui_pagueSubLabel, lv_color_hex(0x999999), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_pagueSubLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui_pagueSubLabel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_pagueSubLabel, &ui_font_OpenSansRegular16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_pagueSubLabel, LV_TEXT_ALIGN_LEFT, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_pagueSubLabel, &ui_font_OpenSansSemiBold12, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_pagueLabel = lv_label_create(ui_payment);
     lv_obj_set_width(ui_pagueLabel, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_pagueLabel, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_pagueLabel, 0);
-    lv_obj_set_y(ui_pagueLabel, lv_pct(63));
-    lv_obj_set_align(ui_pagueLabel, LV_ALIGN_TOP_MID);
+    lv_obj_set_x(ui_pagueLabel, 12);
+    lv_obj_set_y(ui_pagueLabel, lv_pct(69));
     lv_label_set_text(ui_pagueLabel, "Pague seu Café");
     lv_obj_set_style_text_color(ui_pagueLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_pagueLabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_pagueLabel, &ui_font_LoraRegula24, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_pagueLabel, &ui_font_LoraRegular20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_qrCode = lv_img_create(ui_payment);
     lv_img_set_src(ui_qrCode, &ui_img_qr_code_png);
-    lv_obj_set_width(ui_qrCode, LV_SIZE_CONTENT);   /// 256
-    lv_obj_set_height(ui_qrCode, LV_SIZE_CONTENT);    /// 256
-    lv_obj_set_x(ui_qrCode, 0);
-    lv_obj_set_y(ui_qrCode, -39);
-    lv_obj_set_align(ui_qrCode, LV_ALIGN_TOP_MID);
+    lv_obj_set_width(ui_qrCode, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_qrCode, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_qrCode, -32);
+    lv_obj_set_y(ui_qrCode, 61);
+    lv_obj_set_align(ui_qrCode, LV_ALIGN_TOP_RIGHT);
     lv_obj_add_flag(ui_qrCode, LV_OBJ_FLAG_CLICKABLE);     /// Flags
     lv_obj_clear_flag(ui_qrCode, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_img_set_zoom(ui_qrCode, 150);
 
     ui_goBack2 = lv_imgbtn_create(ui_payment);
     lv_imgbtn_set_src(ui_goBack2, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_chevronsmall_png, NULL);
@@ -52,10 +50,10 @@ void ui_payment_screen_init(void)
     lv_imgbtn_set_src(ui_goBack2, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &ui__temporary_image, NULL);
     lv_imgbtn_set_src(ui_goBack2, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &ui__temporary_image, NULL);
     lv_imgbtn_set_src(ui_goBack2, LV_IMGBTN_STATE_CHECKED_DISABLED, NULL, &ui__temporary_image, NULL);
-    lv_obj_set_height(ui_goBack2, 48);
-    lv_obj_set_width(ui_goBack2, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_x(ui_goBack2, 24);
-    lv_obj_set_y(ui_goBack2, 16);
+    lv_obj_set_width(ui_goBack2, 32);
+    lv_obj_set_height(ui_goBack2, 32);
+    lv_obj_set_x(ui_goBack2, 12);
+    lv_obj_set_y(ui_goBack2, 8);
 
     lv_obj_add_event_cb(ui_goBack2, ui_event_goBack2, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_payment, ui_event_payment, LV_EVENT_ALL, NULL);

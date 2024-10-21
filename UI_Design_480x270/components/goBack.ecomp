@@ -47,8 +47,8 @@
       "flags": 17,
       "strtype": "OBJECT/Size",
       "intarray": [
-        30,
-        30
+        32,
+        32
       ],
       "InheritedType": 7
     },
@@ -305,22 +305,7 @@
     },
     {
       "part": "lv.PART.MAIN",
-      "childs": [
-        {
-          "nid": 910482673,
-          "strtype": "_style/StyleState",
-          "strval": "DEFAULT",
-          "childs": [
-            {
-              "nid": -456693854,
-              "strtype": "_style/Transform_scale",
-              "integer": 140,
-              "InheritedType": 6
-            }
-          ],
-          "InheritedType": 1
-        }
-      ],
+      "childs": [],
       "nid": -936455063,
       "strtype": "IMGBUTTON/Style_main",
       "strval": "lv.PART.MAIN, Rectangle, Image, Text, Transform",
