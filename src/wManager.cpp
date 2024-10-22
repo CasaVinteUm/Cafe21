@@ -13,16 +13,15 @@
 // Flag for saving data
 bool shouldSaveConfig = false;
 
-// Variables to hold data from custom textboxes
-//char wm_lnbitsWSApiURL[80] = "/api/v1/ws/";
-
 char wmLNBitsServer[100] = "demo.lnbits.com";
 char wmDeviceId[23] = "TjB6BGbD9RnAQSchgxHMXg";
 char wmLNApiKey[33] = "5cd5fba9aea34f14a7fdb38e7f476922";
 char wmLNApiKeyWS[35] = "5cd5fba9aea34f14a7fdb38e7f476922";
 char wmESPMAC[18] = "bc:dd:c2:47:20:d0";
-float wmPreco = 10.00;
-int wmprecoSats = 0;
+float wmValue = 10.00;
+int wmvalueSats = 0;
+float wmValueC = 10.00;
+int wmvalueSatsC = 0;
 int wmVolume = 300;
 
 
@@ -39,8 +38,10 @@ void saveConfigFile()
  // json["wmDeviceId"] = wmDeviceId;
  // json["wmLNApiKey"] = wmLNApiKey;
   json["wmLNApiKeyWS"] = wmLNApiKeyWS;
-  json["wmPreco"] = wmPreco;
-  json["wmprecoSats"] = wmprecoSats;
+  json["wmValue"] = wmValue;
+  json["wmvalueSats"] = wmvalueSatsC;
+  json["wmValueC"] = wmValueC;
+  json["wmvalueSatsC"] = wmvalueSatsC;
   json["wmVolume"] = wmVolume;
   json["wmESPMAC"] = wmESPMAC;
 
@@ -57,7 +58,7 @@ void saveConfigFile()
   if (serializeJson(json, configFile) == 0)
   {
     // Error writing file
-    //Serial.println(F("Failed to write to file"));
+    Serial.println(F("Failed to write to file"));
   }
   // Close file
   configFile.close();
@@ -97,9 +98,10 @@ bool loadConfigFile()
           // strcpy(wmLNApiKey, json["wmLNApiKey"]);
           strcpy(wmLNApiKeyWS, json["wmLNApiKeyWS"]);
           strcpy(wmESPMAC, json["wmESPMAC"]);          
-          wmprecoSats = json["wmprecoSats"].as<int>();
-          wmVolume = json["wmVolume"].as<int>();
-          wmPreco = json["wmPreco"].as<float>();
+          wmvalueSats = json["wmvalueSats"].as<int>();          
+          wmValue = json["wmValue"].as<float>();
+          wmvalueSatsC = json["wmvalueSatsC"].as<int>();          
+          wmValueC = json["wmValueC"].as<float>();
           Serial.println("Parsing JSON - END!");
           return true;
         }
@@ -192,36 +194,37 @@ void init_WifiManager()
 
   WiFiManagerParameter lnApiKeyWSTBox("LNBitsreadkey", "LNBits Wallet Invoice/read key", wmLNApiKeyWS, 35);
 
-  WiFiManagerParameter wmESPMACTBox("MACADD", "Endereço MAC dos sensores", wmESPMAC, 18);
-
-  // Need to convert numerical input to string to display the default value.
+    // Need to convert numerical input to string to display the default value.
   char convertedValue[6];
-  sprintf(convertedValue, "%.2f", wmPreco); 
+  sprintf(convertedValue, "%.2f", wmValue); 
   
   // Text box (Number) - 7 characters maximum
-  WiFiManagerParameter precoReais("PrecoReais", "Preço R$", convertedValue, 7); 
+  WiFiManagerParameter valueFiat("valueFiat", "Preço Expresso R$", convertedValue, 7); 
 
-  sprintf(convertedValue, "%d", wmprecoSats); 
+  sprintf(convertedValue, "%d", wmvalueSats); 
   
   // Text box (Number) - 8 characters maximum
-  WiFiManagerParameter precoSats("PrecoSatoshis", "Preço sats", convertedValue, 8);
+  WiFiManagerParameter valueSats("PrecoSatoshis", "Preço Expresso sats", convertedValue, 8);
 
-  sprintf(convertedValue, "%d", wmVolume); 
+  sprintf(convertedValue, "%.2f", wmValueC); 
+  
+  // Text box (Number) - 7 characters maximum
+  WiFiManagerParameter valueFiatC("valueFiatC", "Preço Block Coffe R$", convertedValue, 7); 
+
+  sprintf(convertedValue, "%d", wmvalueSatsC); 
+  
   // Text box (Number) - 8 characters maximum
-  WiFiManagerParameter volumeCopo("VolumeCopo", "Volume Copo (ml)", convertedValue, 4);
-  
-  
+  WiFiManagerParameter valueSatsC("PrecoSatoshisC", "Preço Block Coffe sats", convertedValue, 8);
 
   // Add all defined parameters
   wm.addParameter(&lnbitsServerTBox);  
   wm.addParameter(&lnApiKeyWSTBox);
   // wm.addParameter(&deviceIdTBox);
   // wm.addParameter(&lnApiKeyTBox);
-  wm.addParameter(&precoReais);
-  wm.addParameter(&precoSats);
-  wm.addParameter(&volumeCopo);
-  wm.addParameter(&wmESPMACTBox);
-
+  wm.addParameter(&valueFiat);
+  wm.addParameter(&valueSats);
+  wm.addParameter(&valueFiatC);
+  wm.addParameter(&valueSatsC);
   Serial.println("All Parameters done: ");
 
   if (forceConfig)
@@ -230,19 +233,20 @@ void init_WifiManager()
     Serial.println("Force Config...");
     //No configuramos timeout al modulo
     wm.setConfigPortalBlocking(true); //Hacemos que el portal SI bloquee el firmware    
-    if (!wm.startConfigPortal("BityChopp","satschopp"))
+    if (!wm.startConfigPortal(wmSSID,wmPASSWD))
     {
       Serial.println("failed to connect and hit timeout");
       //Could be break forced after edditing, so save new config
       strcpy(wmLNBitsServer, lnbitsServerTBox.getValue());// , sizeof(wmLNBitsServer));
       // strcpy(wmDeviceId, deviceIdTBox.getValue());//, sizeof(wmDeviceId));
       // strcpy(wmLNApiKey, lnApiKeyTBox.getValue());//, sizeof(wmLNApiKey));
-      strcpy(wmLNApiKeyWS, lnApiKeyWSTBox.getValue());//, sizeof(wmLNApiKeyWS));
-      strcpy(wmESPMAC, wmESPMACTBox.getValue());
+      strcpy(wmLNApiKeyWS, lnApiKeyWSTBox.getValue());//, sizeof(wmLNApiKeyWS));      
      
-      wmPreco = atof(precoReais.getValue());
-      wmprecoSats = atoi(precoSats.getValue());
-      wmVolume = atoi(volumeCopo.getValue());
+      wmValue = atof(valueFiat.getValue());
+      wmvalueSats = atoi(valueSats.getValue());      
+
+      wmValueC = atof(valueFiatC.getValue());
+      wmvalueSatsC = atoi(valueSatsC.getValue());   
       
       saveConfigFile();
       delay(3000);
@@ -257,7 +261,7 @@ void init_WifiManager()
     //Tratamos de conectar con la configuración inicial ya almacenada
     wm.setCaptivePortalEnable(true); // disable captive portal redirection
     wm.setConfigPortalBlocking(true);
-    if (!wm.autoConnect("BityChopp","satschopp"))
+    if (!wm.autoConnect(wmSSID,wmPASSWD))
     {
       Serial.println("Failed to connect and hit timeout...");            
     }
@@ -279,12 +283,13 @@ void init_WifiManager()
     strcpy(wmLNBitsServer, lnbitsServerTBox.getValue());// , sizeof(wmLNBitsServer));
    // strcpy(wmDeviceId, deviceIdTBox.getValue());//, sizeof(wmDeviceId));
    // strcpy(wmLNApiKey, lnApiKeyTBox.getValue());//, sizeof(wmLNApiKey));
-    strcpy(wmLNApiKeyWS, lnApiKeyWSTBox.getValue());//, sizeof(wmLNApiKeyWS));
-    strcpy(wmESPMAC, wmESPMACTBox.getValue());
+    strcpy(wmLNApiKeyWS, lnApiKeyWSTBox.getValue());//, sizeof(wmLNApiKeyWS));    
     
-    wmPreco = atof(precoReais.getValue());
-    wmprecoSats = atoi(precoSats.getValue());
-    wmVolume = atoi(volumeCopo.getValue());
+    wmValue = atof(valueFiat.getValue());
+    wmvalueSats = atoi(valueSats.getValue());
+    wmValueC = atof(valueFiatC.getValue());
+    wmvalueSatsC = atoi(valueSatsC.getValue());
+    
   
     // Copy the string value
     // strncpy(wmLNBitsServer, lnbitsServerTBox.getValue(), sizeof(wmLNBitsServer));
@@ -294,10 +299,13 @@ void init_WifiManager()
         Serial.println("Failed to connect reseting...");      
         strcpy(wmLNBitsServer, lnbitsServerTBox.getValue());// , sizeof(wmLNBitsServer));
         strcpy(wmLNApiKeyWS, lnApiKeyWSTBox.getValue());//, sizeof(wmLNApiKeyWS));     
-        strcpy(wmESPMAC, wmESPMACTBox.getValue());       
-        wmPreco = atof(precoReais.getValue());
-        wmprecoSats = atoi(precoSats.getValue());
-        wmVolume = atoi(volumeCopo.getValue());                        
+             
+        wmValue = atof(valueFiat.getValue());
+        wmvalueSats = atoi(valueSats.getValue());
+
+        wmValueC = atof(valueFiat.getValue());
+        wmvalueSatsC = atoi(valueSats.getValue());
+                            
         saveConfigFile();        
         delay(1000);      
         ESP.restart();      

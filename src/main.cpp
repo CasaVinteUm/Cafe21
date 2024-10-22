@@ -3,6 +3,7 @@
 #include <CoffeeMachineMessage.h>
 #include <CoffeeMachineController.h>
 #include <MessageLogger.h>
+#include "wManager.h"
 
 #ifndef ESP32_NODISPLAY
   #include "display.h"
@@ -95,6 +96,9 @@ void setup()
    // Initialize UART communication with the coffee machine
    Serial.println("UART communication with coffee machine initialized.");     
   #endif
+  
+  init_WifiManager();
+
   Serial.println("ESP32 Coffee Machine Logger Starting...");
 
   delay(1000);
