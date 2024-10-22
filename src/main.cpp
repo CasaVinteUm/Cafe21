@@ -271,7 +271,7 @@ void loop()
 
 void readAndProcessMessages()
 {
-  static uint8_t messageBuffer[256];
+  static uint8_t messageBuffer[19];
   static size_t messageIndex = 0;
 
 #ifdef USE_I2C  
