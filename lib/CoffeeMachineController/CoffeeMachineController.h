@@ -23,6 +23,8 @@ private:
     byte onStateCounter;
 
     void sendCommandMessage(CoffeeMachineCommand command);
+    std::string coffeeMachineStateString(CoffeeMachineState state);
+    std::string coffeeMachineCommandString(CoffeeMachineCommand command);
 };
 
 #endif // COFFEEMACHINECONTROLLER_H

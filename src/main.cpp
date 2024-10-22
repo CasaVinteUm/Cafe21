@@ -107,7 +107,7 @@ void loop()
 
 void readAndProcessMessages()
 {
-  static uint8_t messageBuffer[256];
+  static uint8_t messageBuffer[19];
   static size_t messageIndex = 0;
 
   while (Serial1.available())
