@@ -24,25 +24,16 @@ bool CoffeeMachineController::sendOnCommand()
         sendCommandMessage(CoffeeMachineCommand::Beep);
         return false;
     }
-    else
+    else if (currState == CoffeeMachineState::WaitingForOn)
     {
-        if (currState == CoffeeMachineState::WaitingForOn)
-        {
-            sendCommandMessage(CoffeeMachineCommand::On);
-            return false;
-        }
-        else if (currState == CoffeeMachineState::TurningOn)
-        {
-            Serial.println("Setting waitingForOnState = false");
-            onStateCounter = 0;
-            waitingForOnState = false;
-            return true;
-        }
-        else
-        {
-            Serial.println("Unknown state while turning on");
-            return false;
-        }
+        sendCommandMessage(CoffeeMachineCommand::On);
+        return false;
+    }
+    else // if (currState == CoffeeMachineState::TurningOn || currState == CoffeeMachineState::Ready)
+    {
+        onStateCounter = 0;
+        waitingForOnState = false;
+        return true;
     }
 }
 
@@ -92,80 +83,62 @@ void CoffeeMachineController::sendCommandMessage(CoffeeMachineCommand command)
     message[2] = 0x00;
 
     // Common bytes based on tested commands
-    message[3] = 0x01; // Commonly 0x01
-    message[4] = 0x00; // May vary for Start command
-    message[5] = 0x00; // Always 0x00
-    message[6] = 0x02; // Always 0x02
-    message[7] = 0x00; // Varies based on command
-    message[8] = 0x00; // Always 0x00
-    message[9] = 0x00; // May vary for Start command
+    message[3] = 0x01;
+    message[4] = 0x02;
+    message[5] = 0x00;
+    message[6] = 0x09;
+    message[7] = 0x00;
+    message[8] = 0x00;
+    message[9] = 0x00;
+    message[10] = 0x16;
+    message[11] = 0x31;
 
     // Set command-specific bytes
     switch (command)
     {
+    case CoffeeMachineCommand::Status:
+        break;
     case CoffeeMachineCommand::Beep:
         message[2] = 0x0A;
-        message[4] = 0x02;
-        message[6] = 0x09;
         message[10] = 0x09;
         message[11] = 0x15;
         break;
     case CoffeeMachineCommand::On:
         message[2] = 0x01;
-        message[4] = 0x02;
-        message[6] = 0x09;
         message[10] = 0x22;
         message[11] = 0x20;
         break;
-    case CoffeeMachineCommand::Status:
-        message[4] = 0x02;
-        message[6] = 0x09;
-        message[10] = 0x16;
-        message[11] = 0x31;
-        break;
     case CoffeeMachineCommand::Espresso:
-        message[7] = 0x02; // Select Espresso
-        message[10] = 0x19;
-        message[11] = 0x0F;
+        message[7] = 0x02;
+        message[10] = 0x0E;
+        message[11] = 0x2A;
         break;
     case CoffeeMachineCommand::Coffee:
-        message[7] = 0x08; // Select Coffee
-        message[10] = 0x29;
-        message[11] = 0x3E;
+        message[7] = 0x08;
+        message[10] = 0x3E;
+        message[11] = 0x1B;
         break;
     case CoffeeMachineCommand::HotWater:
-        message[7] = 0x04; // Select Hot Water
-        message[10] = 0x31;
-        message[11] = 0x23;
+        message[7] = 0x04;
+        message[10] = 0x26;
+        message[11] = 0x06;
         break;
     case CoffeeMachineCommand::Steam:
-        message[7] = 0x10; // Select Steam
-        message[10] = 0x19;
-        message[11] = 0x04;
+        message[7] = 0x10;
+        message[10] = 0x0E;
+        message[11] = 0x21;
         break;
-    case CoffeeMachineCommand::Start:
-        message[4] = 0x02; // Start command indicator
-        message[9] = 0x01; // Additional byte for Start
-        message[10] = 0x19;
-        message[11] = 0x32;
-        break;
-    case CoffeeMachineCommand::Stop:
-        // Assuming Stop uses the same as Start but with different indicator
-        message[4] = 0x02; // Stop command indicator
-        message[9] = 0x00; // Differentiate from Start
-        message[10] = 0x19;
-        message[11] = 0x32;
+    case CoffeeMachineCommand::StartStop:
+        message[9] = 0x01;
+        message[10] = 0x1E;
+        message[11] = 0x35;
         break;
     case CoffeeMachineCommand::Strength:
-        message[4] = 0x02;
-        message[6] = 0x09;
         message[8] = 0x02;
         message[10] = 0x0E;
         message[11] = 0x28;
         break;
     case CoffeeMachineCommand::Quantity:
-        message[4] = 0x02;
-        message[6] = 0x09;
         message[8] = 0x04;
         message[10] = 0x27;
         message[11] = 0x02;

@@ -24,10 +24,10 @@ void readAndProcessMessages();
 void setup()
 {
   Serial.begin(115200);
-  while (!Serial)
-  {
-    ; // Wait for Serial Monitor to initialize
-  }
+  // while (!Serial)
+  // {
+  //   ; // Wait for Serial Monitor to initialize
+  // }
   Serial.println("ESP32 Coffee Machine Logger Starting...");
 
   // Initialize UART communication with the coffee machine
@@ -43,8 +43,7 @@ void setup()
   Serial.println("'c' - Select Coffee");
   Serial.println("'h' - Select Hot Water");
   Serial.println("'s' - Select Steam");
-  Serial.println("'r' - Start Brewing");
-  Serial.println("'x' - Stop Brewing");
+  Serial.println("'x' - Start/Stop Brewing");
   Serial.println("'t' - Set Strength");
   Serial.println("'q' - Set Quantity");
 }
@@ -81,13 +80,9 @@ void loop()
     {
       coffeeController.sendCommand(CoffeeMachineCommand::Steam);
     }
-    else if (input == "r")
-    {
-      coffeeController.sendCommand(CoffeeMachineCommand::Start);
-    }
     else if (input == "x")
     {
-      coffeeController.sendCommand(CoffeeMachineCommand::Stop);
+      coffeeController.sendCommand(CoffeeMachineCommand::StartStop);
     }
     else if (input == "t")
     {

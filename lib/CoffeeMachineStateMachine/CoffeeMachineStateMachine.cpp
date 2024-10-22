@@ -102,6 +102,9 @@ void CoffeeMachineStateMachine::updateState(const CoffeeMachineMessage &message)
 
 bool CoffeeMachineStateMachine::canSendCommand(CoffeeMachineCommand command) const
 {
+    if (command == CoffeeMachineCommand::On)
+        return true;
+
     switch (currentState)
     {
     case CoffeeMachineState::Off:
@@ -120,7 +123,7 @@ bool CoffeeMachineStateMachine::canSendCommand(CoffeeMachineCommand command) con
                command == CoffeeMachineCommand::Status;
     case CoffeeMachineState::Selected:
         // Can send Start, Strength, Quantity, or selection commands
-        if (command == CoffeeMachineCommand::Start ||
+        if (command == CoffeeMachineCommand::StartStop ||
             command == CoffeeMachineCommand::Espresso ||
             command == CoffeeMachineCommand::Coffee ||
             command == CoffeeMachineCommand::HotWater ||
@@ -143,7 +146,7 @@ bool CoffeeMachineStateMachine::canSendCommand(CoffeeMachineCommand command) con
                 return false;
         }
     case CoffeeMachineState::Brewing:
-        return command == CoffeeMachineCommand::Stop ||
+        return command == CoffeeMachineCommand::StartStop ||
                command == CoffeeMachineCommand::Status;
     case CoffeeMachineState::Error:
         return command == CoffeeMachineCommand::Status;

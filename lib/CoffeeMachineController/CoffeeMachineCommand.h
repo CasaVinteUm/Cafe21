@@ -9,8 +9,7 @@ enum class CoffeeMachineCommand
     Coffee,
     HotWater,
     Steam,
-    Start,
-    Stop,
+    StartStop,
     Strength,
     Quantity,
     Status
