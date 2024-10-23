@@ -67,10 +67,10 @@ void UIController(void *name);
 void setup()
 {
   Serial.begin(115200);
-  while (!Serial)
-  {
-    ; // Wait for Serial Monitor to initialize
-  }
+  // while (!Serial)
+  // {
+  //   ; // Wait for Serial Monitor to initialize
+  // }
  #ifndef ESP32_NODISPLAY
   display_init();
   delay(100);
@@ -110,8 +110,7 @@ void setup()
   Serial.println("'c' - Select Coffee");
   Serial.println("'h' - Select Hot Water");
   Serial.println("'s' - Select Steam");
-  Serial.println("'r' - Start Brewing");
-  Serial.println("'x' - Stop Brewing");
+  Serial.println("'x' - Start/Stop Brewing");
   Serial.println("'t' - Set Strength");
   Serial.println("'q' - Set Quantity");
   Serial.println("'l' - Last message and status");
