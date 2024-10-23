@@ -64,7 +64,7 @@ void ui_hero_screen_init(void)
     lv_obj_set_width(ui_primaryButton, 135);
     lv_obj_set_height(ui_primaryButton, 35);
     lv_obj_set_align(ui_primaryButton, LV_ALIGN_BOTTOM_MID);
-    lv_obj_add_flag(ui_primaryButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_add_flag(ui_primaryButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS | LV_OBJ_FLAG_HIDDEN);     /// Flags
     lv_obj_clear_flag(ui_primaryButton, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_radius(ui_primaryButton, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_primaryButton, lv_color_hex(0xF7AB14), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -93,7 +93,7 @@ void ui_hero_screen_init(void)
     lv_obj_set_x(ui_errorPanel, 0);
     lv_obj_set_y(ui_errorPanel, -12);
     lv_obj_set_align(ui_errorPanel, LV_ALIGN_BOTTOM_MID);
-    lv_obj_clear_flag(ui_errorPanel, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_clear_flag(ui_errorPanel, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_HIDDEN);      /// Flags    ;
     lv_obj_set_scrollbar_mode(ui_errorPanel, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_style_radius(ui_errorPanel, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_errorPanel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -138,6 +138,6 @@ void ui_hero_screen_init(void)
     lv_obj_set_style_text_font(ui_errorDescription, &ui_font_OpenSansSemiBold12, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_logo21, ui_event_logo21, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_hero, ui_event_hero_loading, LV_EVENT_SCREEN_LOADED, NULL);
     lv_obj_add_event_cb(ui_primaryButton, ui_event_primaryButton, LV_EVENT_ALL, NULL);
-
 }

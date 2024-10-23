@@ -118,7 +118,7 @@ void ui_event_logo21(lv_event_t * e)
 void ui_event_hero_loading(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
-    // ui_action = 4;
+    ui_action = 3;
 }
 
 void ui_event_primaryButton(lv_event_t * e)
