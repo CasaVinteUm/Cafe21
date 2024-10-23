@@ -4,3 +4,7 @@
 .vscode/launch.json
 .vscode/ipch
 logs
+UI_Design_480x270/autosave
+UI_Design_480x270/backup
+UI_Design_800x480/autosave
+UI_Design_800x480/backup
