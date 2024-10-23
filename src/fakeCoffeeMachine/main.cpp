@@ -1,13 +1,8 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 
-#ifndef ESP32C3
-#define TX_PIN 18 // Transmit pin: ESP32 TX -> Coffee Machine RX
-#define RX_PIN 17 // Receive pin:  ESP32 RX <- Coffee Machine TX
-#else
-#define TX_PIN 21 // Transmit pin: ESP32 TX -> Coffee Machine RX
-#define RX_PIN 20 // Receive pin:  ESP32 RX <- Coffee Machine TX
-#endif
+#define TX_PIN 21
+#define RX_PIN 20
 
 void sendMessage();
 void processMessage();
@@ -15,10 +10,6 @@ void processMessage();
 void setup()
 {
     Serial.begin(115200);
-    // while (!Serial)
-    // {
-    //   ; // Wait for Serial Monitor to initialize
-    // }
     Serial.println("ESP32 Coffee Machine Logger Starting...");
 
     Serial1.begin(115200, SERIAL_8N1, RX_PIN, TX_PIN);
