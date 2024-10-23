@@ -6,17 +6,17 @@
  ******************************************************************************/
 
 /* uncomment for GT911 */
- #define TOUCH_GT911
- #define TOUCH_GT911_SCL 20
- #define TOUCH_GT911_SDA 19
- #define TOUCH_GT911_INT -1
- #define TOUCH_GT911_RST 38
- #define TOUCH_GT911_ROTATION ROTATION_INVERTED
- #define TOUCH_MAP_X1 0
- #define TOUCH_MAP_X2 480
- #define TOUCH_MAP_Y1 0
- #define TOUCH_MAP_Y2 270
- #undef TOUCH_SWAP_XY
+#define TOUCH_GT911
+#define TOUCH_GT911_SCL 20
+#define TOUCH_GT911_SDA 19
+#define TOUCH_GT911_INT -1
+#define TOUCH_GT911_RST 38
+#define TOUCH_GT911_ROTATION ROTATION_INVERTED
+#define TOUCH_MAP_X1 0
+#define TOUCH_MAP_X2 480
+#define TOUCH_MAP_Y1 0
+#define TOUCH_MAP_Y2 270
+#undef TOUCH_SWAP_XY
 
 int touch_last_x = 0, touch_last_y = 0;
 
@@ -133,15 +133,15 @@ bool touch_touched()
   ts.read();
   if (ts.isTouched)
   {
-    //Serial.println("Tocado");
+    // Serial.println("Tocado");
 #if defined(TOUCH_SWAP_XY)
-    touch_last_x = map(ts.points[0].y, TOUCH_MAP_X1, TOUCH_MAP_X2, 0, 799);//gfx->width() - 1);
-    touch_last_y = map(ts.points[0].x, TOUCH_MAP_Y1, TOUCH_MAP_Y2, 0, 479);//gfx->height() - 1);
+    touch_last_x = map(ts.points[0].y, TOUCH_MAP_X1, TOUCH_MAP_X2, 0, 799); // gfx->width() - 1);
+    touch_last_y = map(ts.points[0].x, TOUCH_MAP_Y1, TOUCH_MAP_Y2, 0, 479); // gfx->height() - 1);
 #else
     touch_last_x = map(ts.points[0].x, TOUCH_MAP_X1, TOUCH_MAP_X2, 0, gfx->width() - 1);
     touch_last_y = map(ts.points[0].y, TOUCH_MAP_Y1, TOUCH_MAP_Y2, 0, gfx->height() - 1);
 #endif
-   //Serial.printf("X:%d Y:%d  ->  X:%d Y:%d\n", ts.points[0].x , ts.points[0].y, touch_last_x, touch_last_y);
+    // Serial.printf("X:%d Y:%d  ->  X:%d Y:%d\n", ts.points[0].x , ts.points[0].y, touch_last_x, touch_last_y);
     return true;
   }
   else
