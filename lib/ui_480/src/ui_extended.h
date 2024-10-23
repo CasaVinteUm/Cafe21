@@ -10,8 +10,7 @@ enum ui_command {
     Iddle,
     Expresso,
     Coffe,
-    Water,
-    PowerOn,
+    Water,    
     Beans,    
     StartStop,
     Cancel,
@@ -19,5 +18,6 @@ enum ui_command {
     WhaitInvoice,
     Serving,
     Error,
+    On
 };
 #endif

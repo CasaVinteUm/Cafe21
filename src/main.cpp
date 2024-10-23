@@ -128,7 +128,7 @@ void setup()
   delay(100);
  #endif 
   // Power on  the machine at start
-  coffeeController.sendCommand(CoffeeMachineCommand::Start, 3);
+  coffeeController.sendCommand(CoffeeMachineCommand::StartStop, 3);
 
 }
 
@@ -164,14 +164,10 @@ void runController(void *name){
       else if (input == "s")
       {
         coffeeController.sendCommand(CoffeeMachineCommand::Steam, 0);
-      }
-      else if (input == "r")
-      {
-        coffeeController.sendCommand(CoffeeMachineCommand::Start, 0);
-      }
+      }      
       else if (input == "x")
       {
-        coffeeController.sendCommand(CoffeeMachineCommand::Stop, 0);
+        coffeeController.sendCommand(CoffeeMachineCommand::StartStop, 0);
       }
       else if (input == "t")
       {
@@ -180,12 +176,8 @@ void runController(void *name){
       else if (input == "q")
       {
         coffeeController.sendCommand(CoffeeMachineCommand::Quantity, 0);
-      }
-      else if (input == "power" || input == "p")
-      {
-        coffeeController.sendCommand(CoffeeMachineCommand::Start, 3);
-      }
-      else if (input == "status" || input == "l")
+      }      
+      else if (input == "l")
       {
         currentMessage.print();
         Serial.printf("Current Status:%d\n", coffeeController.getCurrentState());
@@ -195,6 +187,12 @@ void runController(void *name){
         Serial.println("Unknown command. Please enter a valid command.");
       }
     }
+    else
+    {
+      coffeeController.sendCommand(CoffeeMachineCommand::Status, 0);
+    }
+
+    delay(10);
   } // Loop controller
 }
 
@@ -216,11 +214,11 @@ void UIController(void *name){
       ui_action = 0;
       break;
     case ui_command::StartStop:
-      coffeeController.sendCommand(CoffeeMachineCommand::Start, 0);
+      coffeeController.sendCommand(CoffeeMachineCommand::StartStop, 0);
       ui_action = 0;
       break;
     case ui_command::Cancel:
-      coffeeController.sendCommand(CoffeeMachineCommand::Stop, 0);
+      coffeeController.sendCommand(CoffeeMachineCommand::StartStop, 0);
       ui_action = 0;
       break;
     default:
@@ -318,6 +316,7 @@ void readAndProcessMessages()
         continue;
       }
     }    
+
     // Assuming fixed message length of 19 bytes
     if (messageIndex >= 19)
     {

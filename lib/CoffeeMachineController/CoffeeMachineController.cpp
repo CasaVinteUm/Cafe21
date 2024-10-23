@@ -61,19 +61,23 @@ bool CoffeeMachineController::sendCommand(CoffeeMachineCommand command, byte des
             }
             return true;
         }
-        else if (destination == 3) {
-        sendCommandMessage(command, destination);
-        Serial.println("Command powerOn successfully sent.");
-        return true;
-    } else
-        {
-            CoffeeMachineState currState = stateMachine.getCurrentState();
-            if (currState != CoffeeMachineState::Off)
-            {
-                Serial.println("Command not allowed in the current state");
+        #ifdef USE_I2C
+        else 
+            if (destination == 3) {
+                sendCommandMessage(command, destination);
+                Serial.println("Command powerOn successfully sent.");
+                return true;
             }
-            return false;
-        }
+        #endif
+        else
+            {
+                CoffeeMachineState currState = stateMachine.getCurrentState();
+                if (currState != CoffeeMachineState::Off)
+                {
+                    Serial.println("Command not allowed in the current state");
+                }
+                return false;
+            }
     }
 }
 
