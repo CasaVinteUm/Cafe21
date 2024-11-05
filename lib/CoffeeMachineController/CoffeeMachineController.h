@@ -4,18 +4,18 @@
 
 #include "CoffeeMachineStateMachine.h"
 #include "CoffeeMachineCommand.h"
+#include "CoffeeOptions.h"
 
 class CoffeeMachineController
 {
 public:
-#ifdef USE_I2C
-    CoffeeMachineController();
-#else
     CoffeeMachineController(HardwareSerial &serial);
-#endif
+
     void updateState(const CoffeeMachineMessage &message);
     bool sendOnCommand();
-    bool sendCommand(CoffeeMachineCommand command, byte destinationS);
+    bool sendCommand(CoffeeMachineCommand command);
+    void selectCoffee(CoffeeType type);
+    void startOrder();
 
     CoffeeMachineState getCurrentState() const;
 
@@ -24,6 +24,7 @@ private:
     CoffeeMachineStateMachine stateMachine;
     bool waitingForOnState;
     byte onStateCounter;
+    CoffeeType selectedType = CoffeeType::NONE;
 
     void sendCommandMessage(CoffeeMachineCommand command);
     std::string coffeeMachineStateString(CoffeeMachineState state);

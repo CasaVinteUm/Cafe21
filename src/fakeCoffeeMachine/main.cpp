@@ -9,6 +9,10 @@ void processMessage();
 
 void setup()
 {
+#if ARDUINO_USB_CDC_ON_BOOT == 1
+    delay(5000);
+#endif
+
     Serial.begin(115200);
     Serial.println("ESP32 Coffee Machine Logger Starting...");
 
@@ -144,6 +148,16 @@ void sendMessage()
     }
 
     Serial1.write(message, 19);
+    Serial.print("Writing: ");
+    for (size_t i = 0; i < 19; i++)
+    {
+        Serial.print("0x");
+        if (message[i] < 0x10)
+            Serial.print("0");
+        Serial.print(message[i], HEX);
+        Serial.print(" ");
+    }
+    Serial.println();
 }
 
 void processMessage()
@@ -222,6 +236,16 @@ void processMessage()
             messageIndex = 0;
             sendMessage();
             delay(10); // Stabilize loop
+            Serial.print("received: ");
+            for (size_t i = 0; i < 12; i++)
+            {
+                Serial.print("0x");
+                if (messageBuffer[i] < 0x10)
+                    Serial.print("0");
+                Serial.print(messageBuffer[i], HEX);
+                Serial.print(" ");
+            }
+            Serial.println();
         }
     }
 }

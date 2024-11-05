@@ -6913,105 +6913,105 @@
                 "childs": [
                   {
                     "nid": -576498288,
-                    "compnid": -481638578,
+                    "compnid": -1876856315,
                     "strtype": "_style/StyleState",
                     "strval": "DEFAULT",
                     "InheritedType": 1
                   },
                   {
                     "nid": -736461000,
-                    "compnid": -2092276759,
+                    "compnid": -95945677,
                     "strtype": "_style/StyleState",
                     "strval": "CHECKED",
                     "InheritedType": 1
                   },
                   {
                     "nid": -2119915713,
-                    "compnid": -849490940,
+                    "compnid": -646548501,
                     "strtype": "_style/StyleState",
                     "strval": "PRESSED",
                     "InheritedType": 1
                   },
                   {
                     "nid": 1837360315,
-                    "compnid": -1840660746,
+                    "compnid": 2076695858,
                     "strtype": "_style/StyleState",
                     "strval": "DISABLED",
                     "InheritedType": 1
                   },
                   {
                     "nid": -690027470,
-                    "compnid": 1980390097,
+                    "compnid": 827670278,
                     "strtype": "_style/StyleState",
                     "strval": "EDITED",
                     "InheritedType": 1
                   },
                   {
                     "nid": -1990485457,
-                    "compnid": -1591447722,
+                    "compnid": 433149034,
                     "strtype": "_style/StyleState",
                     "strval": "SCROLLED",
                     "InheritedType": 1
                   },
                   {
                     "nid": 460563840,
-                    "compnid": -944544871,
+                    "compnid": 1646210253,
                     "strtype": "_style/StyleState",
                     "strval": "FOCUSED",
                     "InheritedType": 1
                   },
                   {
                     "nid": 1733207621,
-                    "compnid": -754857620,
+                    "compnid": -755505216,
                     "strtype": "_style/StyleState",
                     "strval": "FOCUS_KEY",
                     "InheritedType": 1
                   },
                   {
                     "nid": 811906926,
-                    "compnid": 383124503,
+                    "compnid": -643273907,
                     "strtype": "_style/StyleState",
                     "strval": "CHECKED|FOCUSED",
                     "InheritedType": 1
                   },
                   {
                     "nid": -1024163751,
-                    "compnid": 1585711091,
+                    "compnid": -1669668465,
                     "strtype": "_style/StyleState",
                     "strval": "CHECKED|PRESSED",
                     "InheritedType": 1
                   },
                   {
                     "nid": 672426006,
-                    "compnid": 2136527986,
+                    "compnid": -117525444,
                     "strtype": "_style/StyleState",
                     "strval": "CHECKED|FOCUS_KEY",
                     "InheritedType": 1
                   },
                   {
                     "nid": 1320063989,
-                    "compnid": 322128441,
+                    "compnid": -1915383212,
                     "strtype": "_style/StyleState",
                     "strval": "USER_1",
                     "InheritedType": 1
                   },
                   {
                     "nid": 1481896885,
-                    "compnid": 1478584926,
+                    "compnid": 728123438,
                     "strtype": "_style/StyleState",
                     "strval": "USER_2",
                     "InheritedType": 1
                   },
                   {
                     "nid": -1015585235,
-                    "compnid": 195078325,
+                    "compnid": 756992037,
                     "strtype": "_style/StyleState",
                     "strval": "USER_3",
                     "InheritedType": 1
                   },
                   {
                     "nid": 27686816,
-                    "compnid": -1083164008,
+                    "compnid": 43115822,
                     "strtype": "_style/StyleState",
                     "strval": "USER_4",
                     "InheritedType": 1
@@ -17031,7 +17031,7 @@
     "theme_color2": 0,
     "uiExportFolderPath": "D:\\Arduino\\PlatformIo_Projetos\\Casa21\\Cafe21\\Cafe21\\lib\\ui_480\\src",
     "projectExportFolderPath": "D:\\Arduino\\PlatformIo_Projetos\\Casa21\\Cafe21\\Cafe21\\UI_Design_480x270\\ExportRoot",
-    "backup_cnt": 518,
+    "backup_cnt": 537,
     "autosave_cnt": 0,
     "lvgl_version": "8.3.11",
     "callfuncsexport": "C_FILE",

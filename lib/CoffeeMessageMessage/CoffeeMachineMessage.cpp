@@ -107,7 +107,7 @@ CoffeeMachineMessage::CoffeeMachineMessage(const uint8_t *message, size_t length
 
     // Byte 13: No Water indicator
     noWater = (message[13] == 0x38);
-    
+
     // Byte 14: Clean Trash indicator
     cleanTrash = (message[14] == 0x38);
 
@@ -140,6 +140,7 @@ bool CoffeeMachineMessage::operator==(const CoffeeMachineMessage &other) const
 
 void CoffeeMachineMessage::print() const
 {
+#ifndef NO_DEBUG_SERIAL
     Serial.print("Message Type: 0x");
     Serial.println(messageType, HEX);
     Serial.print("LED Espresso: 0x");
@@ -162,4 +163,5 @@ void CoffeeMachineMessage::print() const
     Serial.println(generalWarning ? "Yes" : "No");
     Serial.print("Play Button: ");
     Serial.println(play ? "Yes" : "No");
+#endif // DEBUG_SERIAL
 }

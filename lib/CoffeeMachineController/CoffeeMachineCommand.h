@@ -11,7 +11,7 @@ enum class CoffeeMachineCommand
     Steam,
     StartStop,
     Strength,
-    Quantity,        
+    Quantity,
     Status
 };
 
