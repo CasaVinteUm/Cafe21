@@ -66,3 +66,7 @@ def homeConfigClikced(event_struct):
 def homeConfigClicked(event_struct):
     return
 
+
+def configPasswordKeyboardValueChanged(event_struct):
+    return
+

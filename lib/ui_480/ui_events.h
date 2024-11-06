@@ -10,12 +10,18 @@
 extern "C" {
 #endif
 
+void homeConfigClicked(lv_event_t * e);
 void chooseBackButtonClicked(lv_event_t * e);
 void chooseButton1Clicked(lv_event_t * e);
 void chooseButton2Clicked(lv_event_t * e);
 void paymentBackButtonClicked(lv_event_t * e);
 void preparingCancelButtonClicked(lv_event_t * e);
 void successPanelButtonClicked(lv_event_t * e);
+void configButtonEspressoClicked(lv_event_t * e);
+void configButtonCoffeeClicked(lv_event_t * e);
+void configButtonResetClicked(lv_event_t * e);
+void configButtonBackClicked(lv_event_t * e);
+void configPasswordKeyboardValueChanged(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

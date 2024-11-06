@@ -21,6 +21,7 @@ void configButtonEspressoClicked(lv_event_t * e);
 void configButtonCoffeeClicked(lv_event_t * e);
 void configButtonResetClicked(lv_event_t * e);
 void configButtonBackClicked(lv_event_t * e);
+void configPasswordKeyboardValueChanged(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

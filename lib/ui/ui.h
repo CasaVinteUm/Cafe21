@@ -20,8 +20,6 @@ void ui_home_screen_init(void);
 extern lv_obj_t *ui_home;
 void ui_event_homeLogo( lv_event_t * e);
 extern lv_obj_t *ui_homeLogo;
-void ui_event_homeConfig( lv_event_t * e);
-extern lv_obj_t *ui_homeConfig;
 extern lv_obj_t *ui_homeContainerTitle;
 extern lv_obj_t *ui_homeTitle;
 extern lv_obj_t *ui_homeSubTitle;
@@ -32,6 +30,8 @@ extern lv_obj_t *ui_homeErrorPanel;
 extern lv_obj_t *ui_homeErrorIcon;
 extern lv_obj_t *ui_homeErrorTitle;
 extern lv_obj_t *ui_homeErrorSubTitle;
+void ui_event_homeConfig( lv_event_t * e);
+extern lv_obj_t *ui_homeConfig;
 // CUSTOM VARIABLES
 
 // SCREEN: ui_choose
@@ -98,10 +98,10 @@ void ui_event_preparingLogo2( lv_event_t * e);
 extern lv_obj_t *ui_preparingLogo2;
 // CUSTOM VARIABLES
 
-// SCREEN: ui_successLogo
-void ui_successLogo_screen_init(void);
-void ui_event_successLogo( lv_event_t * e);
-extern lv_obj_t *ui_successLogo;
+// SCREEN: ui_success
+void ui_success_screen_init(void);
+void ui_event_success( lv_event_t * e);
+extern lv_obj_t *ui_success;
 extern lv_obj_t *ui_successPanel;
 extern lv_obj_t *ui_successPanelImage;
 extern lv_obj_t *ui_successPanelTitle;
@@ -128,9 +128,14 @@ void ui_event_configButtonBack( lv_event_t * e);
 extern lv_obj_t *ui_configButtonBack;
 extern lv_obj_t *ui_configButtonBackLabel;
 extern lv_obj_t *ui_configPasswordPanel;
-extern lv_obj_t *ui_configPasswordTitle;
+extern lv_obj_t *ui_configPasswordLabel;
 extern lv_obj_t *ui_configPasswordText;
+void ui_event_configPasswordKeyboard( lv_event_t * e);
 extern lv_obj_t *ui_configPasswordKeyboard;
+void ui_event_configBack( lv_event_t * e);
+extern lv_obj_t *ui_configBack;
+void ui_event_configLogo( lv_event_t * e);
+extern lv_obj_t *ui_configLogo;
 // CUSTOM VARIABLES
 
 // EVENTS
@@ -138,8 +143,8 @@ extern lv_obj_t *ui____initial_actions0;
 
 // IMAGES AND IMAGE SETS
 LV_IMG_DECLARE( ui_img_logo21_png);   // assets/logo21.png
-LV_IMG_DECLARE( ui_img_config_png);   // assets/config.png
 LV_IMG_DECLARE( ui_img_water_png);   // assets/water.png
+LV_IMG_DECLARE( ui_img_config_png);   // assets/config.png
 LV_IMG_DECLARE( ui_img_espresso_png);   // assets/espresso.png
 LV_IMG_DECLARE( ui_img_coffee_png);   // assets/coffee.png
 LV_IMG_DECLARE( ui_img_chevron_png);   // assets/chevron.png

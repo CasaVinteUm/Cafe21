@@ -6,7 +6,7 @@ MessageLogger::MessageLogger() : lastMessageLength(0), hasLastMessage(false)
 
 void MessageLogger::logMessage(Sender sender, const uint8_t *message, size_t length, bool logOnlyIfNotRepeated)
 {
-#if ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
+#if ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_VERBOSE
     bool isRepeated = false;
 
     if (logOnlyIfNotRepeated && hasLastMessage)
@@ -22,7 +22,7 @@ void MessageLogger::logMessage(Sender sender, const uint8_t *message, size_t len
         char hexString[length * 5 + 1];
         hexDump(message, length, hexString, sizeof(hexString));
 
-        log_d("Message from %s: %s", senderString(sender), hexString);
+        log_v("Message from %s: %s", senderString(sender), hexString);
 
         // Store the message for future comparison
         if (logOnlyIfNotRepeated)

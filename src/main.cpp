@@ -27,17 +27,18 @@ void setup()
 #endif
 
 #ifdef DISPLAY_WIDTH
+  esp_log_level_set("esp_touch_gt911", ESP_LOG_ERROR);
+
   // Initialize SmartDisplay
   smartdisplay_init();
 
   // Get Default Display
   __attribute__((unused)) auto disp = lv_disp_get_default();
 
-  // Set Rotation as needed
-  if (DISPLAY_HEIGHT > DISPLAY_WIDTH)
-  {
-    lv_disp_set_rotation(disp, LV_DISP_ROT_90);
-  }
+// Set Rotation as needed
+#if DISPLAY_HEIGHT > DISPLAY_WIDTH
+  lv_disp_set_rotation(disp, LV_DISP_ROT_90);
+#endif
 
   // Initialiez UI
   ui_init();
@@ -163,6 +164,11 @@ void UIController(void *name)
   // UI
   log_i("UI Controller started");
 
+  static bool isBrewingBarAnimated = false;
+  static lv_timer_t *progressTimer = NULL;
+  static uint32_t progressStartTime = 0;
+  static const uint32_t PROGRESS_DURATION = 5000;
+
   while (true)
   {
     if (Lightning.getIsConnected())
@@ -197,6 +203,10 @@ void UIController(void *name)
         lv_label_set_text(ui_homeErrorSubTitle, "Aguarde uns instantes.\n");
         break;
       case CoffeeMachineState::Ready:
+        if (isBrewingBarAnimated)
+        {
+          isBrewingBarAnimated = false;
+        }
         lv_obj_clear_flag(ui_homeButton, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(ui_homeSubTitle, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
@@ -225,6 +235,37 @@ void UIController(void *name)
           lv_img_set_src(ui_homeErrorIcon, &ui_img_trash_png);
           lv_label_set_text(ui_homeErrorTitle, "Ops! Estamos com problemas!");
           lv_label_set_text(ui_homeErrorSubTitle, "Verifique se a bandeja está cheia ou se o café está no final.");
+        }
+        break;
+      case CoffeeMachineState::Brewing:
+        if (!isBrewingBarAnimated)
+        {
+          isBrewingBarAnimated = true;
+          progressStartTime = lv_tick_get();
+          if (!progressTimer)
+          {
+            progressTimer = lv_timer_create([](_lv_timer_t *)
+                                            {
+              if (!isBrewingBarAnimated) {
+                _ui_screen_change(&ui_success, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_success_screen_init);
+                lv_bar_set_value(ui_preparingProgress, 0, LV_ANIM_OFF);
+                lv_timer_del(progressTimer);
+                progressTimer = NULL;
+                return;
+            }
+
+            uint32_t elapsed = lv_tick_get() - progressStartTime;
+            if (elapsed >= PROGRESS_DURATION) {
+                // Reset
+                lv_bar_set_value(ui_preparingProgress, 0, LV_ANIM_OFF);
+                progressStartTime = lv_tick_get();
+            } else {
+                // Update progress
+                int32_t progress = (elapsed * 100) / PROGRESS_DURATION;
+                lv_bar_set_value(ui_preparingProgress, progress, LV_ANIM_OFF);
+            } },
+                                            50, NULL);
+          }
         }
         break;
       default:
@@ -350,7 +391,7 @@ void generateQrCode(uint8_t buttonNumber)
 
 void chooseButton1Clicked(lv_event_t *e)
 {
-  isWaitingPayment = 1;
+  waitingPaymentFor = 1;
   coffeeController.selectCoffee(CoffeeType::ESPRESSO);
   _ui_screen_change(&ui_payment, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_payment_screen_init);
 
@@ -364,7 +405,7 @@ void chooseButton1Clicked(lv_event_t *e)
 
 void chooseButton2Clicked(lv_event_t *e)
 {
-  isWaitingPayment = 2;
+  waitingPaymentFor = 2;
   coffeeController.selectCoffee(CoffeeType::COFFEE);
   _ui_screen_change(&ui_payment, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_payment_screen_init);
 
@@ -404,25 +445,22 @@ void successPanelButtonClicked(lv_event_t *e)
 
 void homeConfigClicked(lv_event_t *e)
 {
-  log_d("setting flag1");
   lv_obj_add_flag(ui_configPanel, LV_OBJ_FLAG_HIDDEN);
-  log_d("setting flag2");
   lv_obj_clear_flag(ui_configPasswordPanel, LV_OBJ_FLAG_HIDDEN);
 
-  log_d("calling screen");
   _ui_screen_change(&ui_config, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_config_screen_init);
 }
 
 void configButtonEspressoClicked(lv_event_t *e)
 {
-  isWaitingPayment = 1;
+  waitingPaymentFor = 1;
   coffeeController.selectCoffee(CoffeeType::ESPRESSO);
   onInvoicePaid(1);
 }
 
 void configButtonCoffeeClicked(lv_event_t *e)
 {
-  isWaitingPayment = 2;
+  waitingPaymentFor = 2;
   coffeeController.selectCoffee(CoffeeType::COFFEE);
   onInvoicePaid(2);
 }
@@ -442,6 +480,48 @@ void configButtonBackClicked(lv_event_t *e)
   _ui_screen_change(&ui_home, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_home_screen_init);
 }
 
+void configPasswordKeyboardValueChanged(lv_event_t *e)
+{
+  lv_event_code_t code = lv_event_get_code(e);
+  lv_obj_t *obj = lv_event_get_target(e);
+
+  if (code == LV_EVENT_VALUE_CHANGED)
+  {
+    uint16_t key = lv_keyboard_get_selected_btn(obj);
+    const char *txt = lv_btnmatrix_get_btn_text(obj, key);
+
+    if (txt != NULL && strcmp(txt, LV_SYMBOL_OK) == 0)
+    {
+      // Enter key was pressed
+      const char *entered_text = lv_textarea_get_text(ui_configPasswordText);
+      if (strcmp(entered_text, String(CONFIG_PASSWORD).c_str()) == 0)
+      {
+        // Password correct - show config panel
+        lv_obj_clear_flag(ui_configPanel, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_configPasswordPanel, LV_OBJ_FLAG_HIDDEN);
+
+        // Clear password
+        lv_textarea_set_text(ui_configPasswordText, "");
+      }
+      else
+      {
+        // Password incorrect - show error message
+        lv_textarea_set_text(ui_configPasswordText, "");
+
+        // Show error message label
+        // lv_label_set_text(ui_configPasswordLabel, "Invalid Password");
+        lv_obj_clear_flag(ui_configPasswordLabel, LV_OBJ_FLAG_HIDDEN);
+
+        // Hide error message after 2 seconds
+        lv_timer_t *timer = lv_timer_create([](lv_timer_t *t)
+                                            {
+            lv_obj_add_flag(ui_configPasswordLabel, LV_OBJ_FLAG_HIDDEN);
+            lv_timer_del(t); }, 2000, NULL);
+      }
+    }
+  }
+}
+
 void clearQrCode()
 {
   lv_timer_create([](lv_timer_t *timer)
@@ -454,9 +534,19 @@ void clearQrCode()
 
 void onInvoicePaid(uint8_t type)
 {
-  if (isWaitingPayment == type)
+  if (waitingPaymentFor == type)
   {
-    isWaitingPayment = 0;
+    waitingPaymentFor = 0;
+    if (type == 1)
+    {
+      lv_img_set_src(ui_preparingImage, &ui_img_espresso_png);
+      lv_label_set_text(ui_homeErrorTitle, "Minerando seu\nEspresso To The Moon");
+    }
+    else
+    {
+      lv_img_set_src(ui_preparingImage, &ui_img_coffee_png);
+      lv_label_set_text(ui_homeErrorTitle, "Minerando seu\nBlock Coffee");
+    }
     _ui_screen_change(&ui_preparing, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_preparing_screen_init);
     clearQrCode();
     coffeeController.startOrder();

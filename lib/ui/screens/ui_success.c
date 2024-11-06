@@ -5,13 +5,13 @@
 
 #include "../ui.h"
 
-void ui_successLogo_screen_init(void)
+void ui_success_screen_init(void)
 {
-ui_successLogo = lv_obj_create(NULL);
-lv_obj_set_style_bg_color(ui_successLogo, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_successLogo, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+ui_success = lv_obj_create(NULL);
+lv_obj_set_style_bg_color(ui_success, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_success, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_successPanel = lv_obj_create(ui_successLogo);
+ui_successPanel = lv_obj_create(ui_success);
 lv_obj_set_width( ui_successPanel, 360);
 lv_obj_set_height( ui_successPanel, 372);
 lv_obj_set_align( ui_successPanel, LV_ALIGN_CENTER );
@@ -74,7 +74,7 @@ lv_obj_set_style_text_color(ui_successButtonLabel, lv_color_hex(0x000000), LV_PA
 lv_obj_set_style_text_opa(ui_successButtonLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_successButtonLabel, &ui_font_OpenSansBold20, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_logoSuccess = lv_img_create(ui_successLogo);
+ui_logoSuccess = lv_img_create(ui_success);
 lv_img_set_src(ui_logoSuccess, &ui_img_logo21_png);
 lv_obj_set_width( ui_logoSuccess, LV_SIZE_CONTENT);  /// 48
 lv_obj_set_height( ui_logoSuccess, LV_SIZE_CONTENT);   /// 48
@@ -84,6 +84,6 @@ lv_obj_add_flag( ui_logoSuccess, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
 lv_obj_clear_flag( ui_logoSuccess, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
 lv_obj_add_event_cb(ui_successPanelButton, ui_event_successPanelButton, LV_EVENT_ALL, NULL);
-lv_obj_add_event_cb(ui_successLogo, ui_event_successLogo, LV_EVENT_ALL, NULL);
+lv_obj_add_event_cb(ui_success, ui_event_success, LV_EVENT_ALL, NULL);
 
 }

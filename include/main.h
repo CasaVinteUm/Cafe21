@@ -33,7 +33,7 @@ void onInvoicePaid(uint8_t type);
 void runController(void *name);
 void readAndProcessMessages();
 
-uint8_t isWaitingPayment = 0;
+uint8_t waitingPaymentFor = 0;
 uint8_t delay_lvgl = 0;
 lv_coord_t qrCodeSize = QRCODE_INITIAL_SIZE;
 

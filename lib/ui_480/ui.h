@@ -19,7 +19,6 @@ extern "C" {
 void ui_home_screen_init(void);
 extern lv_obj_t *ui_home;
 extern lv_obj_t *ui_homeLogo;
-extern lv_obj_t *ui_homeConfig;
 extern lv_obj_t *ui_homeContainerTitle;
 extern lv_obj_t *ui_homeTitle;
 extern lv_obj_t *ui_homeSubTitle;
@@ -30,6 +29,8 @@ extern lv_obj_t *ui_homeErrorPanel;
 extern lv_obj_t *ui_homeErrorIcon;
 extern lv_obj_t *ui_homeErrorTitle;
 extern lv_obj_t *ui_homeErrorSubTitle;
+void ui_event_homeConfig( lv_event_t * e);
+extern lv_obj_t *ui_homeConfig;
 // CUSTOM VARIABLES
 
 // SCREEN: ui_choose
@@ -99,21 +100,44 @@ extern lv_obj_t *ui_successPanelTitle;
 extern lv_obj_t *ui_sucessPanelImage;
 // CUSTOM VARIABLES
 
+// SCREEN: ui_config
+void ui_config_screen_init(void);
+extern lv_obj_t *ui_config;
+extern lv_obj_t *ui_configPanel;
+void ui_event_configButtonEspresso( lv_event_t * e);
+extern lv_obj_t *ui_configButtonEspresso;
+extern lv_obj_t *ui_configButtonEspressoLabel;
+void ui_event_configButtonCoffee( lv_event_t * e);
+extern lv_obj_t *ui_configButtonCoffee;
+extern lv_obj_t *ui_configButtonCoffeeLabel;
+void ui_event_configButtonReset( lv_event_t * e);
+extern lv_obj_t *ui_configButtonReset;
+extern lv_obj_t *ui_configButtonResetLabel;
+void ui_event_configButtonBack( lv_event_t * e);
+extern lv_obj_t *ui_configButtonBack;
+extern lv_obj_t *ui_configButtonBackLabel;
+extern lv_obj_t *ui_configPasswordPanel;
+extern lv_obj_t *ui_configPasswordLabel;
+extern lv_obj_t *ui_configPasswordText;
+void ui_event_configPasswordKeyboard( lv_event_t * e);
+extern lv_obj_t *ui_configPasswordKeyboard;
+// CUSTOM VARIABLES
+
 // EVENTS
 extern lv_obj_t *ui____initial_actions0;
 
 // IMAGES AND IMAGE SETS
 LV_IMG_DECLARE( ui_img_logo21_png);   // assets/logo21.png
-LV_IMG_DECLARE( ui_img_config_png);   // assets/config.png
 LV_IMG_DECLARE( ui_img_water_png);   // assets/water.png
+LV_IMG_DECLARE( ui_img_config_png);   // assets/config.png
 LV_IMG_DECLARE( ui_img_chevron_png);   // assets/chevron.png
 LV_IMG_DECLARE( ui_img_espresso_png);   // assets/espresso.png
 LV_IMG_DECLARE( ui_img_coffee_png);   // assets/coffee.png
 LV_IMG_DECLARE( ui_img_check_png);   // assets/check.png
 LV_IMG_DECLARE( ui_img_exit_png);   // assets/exit.png
+LV_IMG_DECLARE( ui_img_trash_png);   // assets/trash.png
 LV_IMG_DECLARE( ui_img_warning_png);   // assets/warning.png
 LV_IMG_DECLARE( ui_img_wifi_png);   // assets/wifi.png
-LV_IMG_DECLARE( ui_img_trash_png);   // assets/trash.png
 
 // FONTS
 LV_FONT_DECLARE( ui_font_LoraRegular14);

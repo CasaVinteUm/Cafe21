@@ -14,8 +14,6 @@ void ui_home_screen_init(void);
 lv_obj_t *ui_home;
 void ui_event_homeLogo( lv_event_t * e);
 lv_obj_t *ui_homeLogo;
-void ui_event_homeConfig( lv_event_t * e);
-lv_obj_t *ui_homeConfig;
 lv_obj_t *ui_homeContainerTitle;
 lv_obj_t *ui_homeTitle;
 lv_obj_t *ui_homeSubTitle;
@@ -26,6 +24,8 @@ lv_obj_t *ui_homeErrorPanel;
 lv_obj_t *ui_homeErrorIcon;
 lv_obj_t *ui_homeErrorTitle;
 lv_obj_t *ui_homeErrorSubTitle;
+void ui_event_homeConfig( lv_event_t * e);
+lv_obj_t *ui_homeConfig;
 // CUSTOM VARIABLES
 
 
@@ -96,10 +96,10 @@ lv_obj_t *ui_preparingLogo2;
 // CUSTOM VARIABLES
 
 
-// SCREEN: ui_successLogo
-void ui_successLogo_screen_init(void);
-void ui_event_successLogo( lv_event_t * e);
-lv_obj_t *ui_successLogo;
+// SCREEN: ui_success
+void ui_success_screen_init(void);
+void ui_event_success( lv_event_t * e);
+lv_obj_t *ui_success;
 lv_obj_t *ui_successPanel;
 lv_obj_t *ui_successPanelImage;
 lv_obj_t *ui_successPanelTitle;
@@ -127,9 +127,14 @@ void ui_event_configButtonBack( lv_event_t * e);
 lv_obj_t *ui_configButtonBack;
 lv_obj_t *ui_configButtonBackLabel;
 lv_obj_t *ui_configPasswordPanel;
-lv_obj_t *ui_configPasswordTitle;
+lv_obj_t *ui_configPasswordLabel;
 lv_obj_t *ui_configPasswordText;
+void ui_event_configPasswordKeyboard( lv_event_t * e);
 lv_obj_t *ui_configPasswordKeyboard;
+void ui_event_configBack( lv_event_t * e);
+lv_obj_t *ui_configBack;
+void ui_event_configLogo( lv_event_t * e);
+lv_obj_t *ui_configLogo;
 // CUSTOM VARIABLES
 
 // EVENTS
@@ -157,19 +162,19 @@ if ( event_code == LV_EVENT_CLICKED) {
 }
 }
 
-void ui_event_homeConfig( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_CLICKED) {
-      homeConfigClicked( e );
-}
-}
-
 void ui_event_homeButton( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);
 
 if ( event_code == LV_EVENT_CLICKED) {
       _ui_screen_change( &ui_choose, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_choose_screen_init);
+}
+}
+
+void ui_event_homeConfig( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+if ( event_code == LV_EVENT_CLICKED) {
+      homeConfigClicked( e );
 }
 }
 
@@ -263,7 +268,7 @@ lv_indev_wait_release(lv_indev_get_act());
       _ui_screen_change( &ui_home, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_home_screen_init);
 }
 if ( event_code == LV_EVENT_CLICKED) {
-      _ui_screen_change( &ui_successLogo, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_successLogo_screen_init);
+      _ui_screen_change( &ui_success, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_success_screen_init);
 }
 }
 
@@ -283,7 +288,7 @@ if ( event_code == LV_EVENT_CLICKED) {
 }
 }
 
-void ui_event_successLogo( lv_event_t * e) {
+void ui_event_success( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);
 
 if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT  ) {
@@ -332,6 +337,30 @@ if ( event_code == LV_EVENT_CLICKED) {
 }
 }
 
+void ui_event_configPasswordKeyboard( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+if ( event_code == LV_EVENT_VALUE_CHANGED) {
+      configPasswordKeyboardValueChanged( e );
+}
+}
+
+void ui_event_configBack( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+if ( event_code == LV_EVENT_CLICKED) {
+      _ui_screen_change( &ui_home, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_home_screen_init);
+}
+}
+
+void ui_event_configLogo( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+if ( event_code == LV_EVENT_CLICKED) {
+      _ui_screen_change( &ui_choose, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_choose_screen_init);
+}
+}
+
 ///////////////////// SCREENS ////////////////////
 
 void ui_init( void )
@@ -343,7 +372,7 @@ ui_home_screen_init();
 ui_choose_screen_init();
 ui_payment_screen_init();
 ui_preparing_screen_init();
-ui_successLogo_screen_init();
+ui_success_screen_init();
 ui_config_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
 lv_disp_load_scr( ui_home);

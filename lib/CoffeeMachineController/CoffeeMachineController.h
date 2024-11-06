@@ -18,6 +18,7 @@ public:
     bool sendCommand(CoffeeMachineCommand command);
     void selectCoffee(CoffeeType type);
     void startOrder();
+    CoffeeType getSelectedCoffee() { return selectedType; }
 
     CoffeeMachineState getCurrentState() const;
 
