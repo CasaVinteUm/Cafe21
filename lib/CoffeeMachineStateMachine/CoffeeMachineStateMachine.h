@@ -1,6 +1,8 @@
 #ifndef COFFEEMACHINESTATEMACHINE_H
 #define COFFEEMACHINESTATEMACHINE_H
 
+#include "esp_log.h"
+
 #include "CoffeeMachineState.h"
 #include "CoffeeMachineCommand.h"
 #include "CoffeeMachineMessage.h"

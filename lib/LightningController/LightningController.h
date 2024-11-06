@@ -6,6 +6,9 @@
 #include "WiFi.h"
 #include <WebSocketsClient.h>
 #include "ui.h"
+#include "esp_log.h"
+
+#include "MessageLogger.h"
 
 class LightningController
 {

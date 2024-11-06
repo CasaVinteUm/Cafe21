@@ -137,31 +137,3 @@ bool CoffeeMachineMessage::operator==(const CoffeeMachineMessage &other) const
            generalWarning == other.generalWarning &&
            play == other.play;
 }
-
-void CoffeeMachineMessage::print() const
-{
-#ifndef NO_DEBUG_SERIAL
-    Serial.print("Message Type: 0x");
-    Serial.println(messageType, HEX);
-    Serial.print("LED Espresso: 0x");
-    Serial.println(ledEspresso, HEX);
-    Serial.print("LED Coffee: 0x");
-    Serial.println(ledCoffee, HEX);
-    Serial.print("LED Hot Water: ");
-    Serial.println(ledHotWater ? "Yes" : "No");
-    Serial.print("LED Steam: ");
-    Serial.println(ledSteam ? "Yes" : "No");
-    Serial.print("Coffee Strength: ");
-    Serial.println(coffeeStrength);
-    Serial.print("Quantity: ");
-    Serial.println(quantity);
-    Serial.print("No Water: ");
-    Serial.println(noWater ? "Yes" : "No");
-    Serial.print("Clean Trash: ");
-    Serial.println(cleanTrash ? "Yes" : "No");
-    Serial.print("General Warning: ");
-    Serial.println(generalWarning ? "Yes" : "No");
-    Serial.print("Play Button: ");
-    Serial.println(play ? "Yes" : "No");
-#endif // DEBUG_SERIAL
-}

@@ -24,26 +24,20 @@ public:
     uint8_t ledCoffee;
     bool ledHotWater;
     bool ledSteam;
-    uint8_t coffeeStrength; // 1-3 corresponding to the number of LEDs lit
-    uint8_t quantity;       // 1-3 corresponding to the number of LEDs lit
+    uint8_t coffeeStrength;
+    uint8_t quantity;
     bool noWater;
     bool cleanTrash;
     bool generalWarning;
     bool play;
     bool loading;
 
-    // Default constructor
     CoffeeMachineMessage();
-
-    // Constructor to parse from raw message
     CoffeeMachineMessage(const uint8_t *message, size_t length);
 
     // Equality operator to compare messages
     bool operator==(const CoffeeMachineMessage &other) const;
     bool operator!=(const CoffeeMachineMessage &other) const { return !(*this == other); }
-
-    // For debugging: print the message
-    void print() const;
 };
 
 #endif // COFFEEMACHINEMESSAGE_H

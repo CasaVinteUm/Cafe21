@@ -7,6 +7,14 @@
 #include <MessageLogger.h>
 #include "wManager.h"
 
+// Remove all kinds of logging to serial if we only have one UART
+#ifdef NO_DEBUG_SERIAL
+#ifdef CORE_DEBUG_LEVEL
+#undef CORE_DEBUG_LEVEL
+#endif // CORE_DEBUG_LEVEL
+#define CORE_DEBUG_LEVEL = ARDUHAL_LOG_LEVEL_NONE
+#endif // NO_DEBUG_SERIAL
+
 #ifdef DISPLAY_WIDTH
 #define QRCODE_INITIAL_SIZE 200
 
