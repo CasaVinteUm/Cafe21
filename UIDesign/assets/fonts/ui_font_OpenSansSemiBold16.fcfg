@@ -1,0 +1,16 @@
+{
+  "codename": "OpenSansSemiBold16",
+  "ttf_path": "/assets/OpenSans-SemiBold.ttf",
+  "bin_path": "/assets/ui_font_OpenSansSemiBold16.bin",
+  "c_path": "/assets/ui_font_OpenSansSemiBold16.c",
+  "cfg_path": "/assets/ui_font_OpenSansSemiBold16.fcfg",
+  "size": 16,
+  "bpp": 4,
+  "letters": 0,
+  "ranges": [
+    "0x20-0xff"
+  ],
+  "symbols": "",
+  "customparams": "--no-compress --no-prefilter",
+  "uploaded": false
+}

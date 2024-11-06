@@ -4,20 +4,23 @@
 #include "CoffeeMachineState.h"
 #include "CoffeeMachineCommand.h"
 #include "CoffeeMachineMessage.h"
+#include "CoffeeOptions.h"
 
 class CoffeeMachineStateMachine
 {
 public:
     CoffeeMachineStateMachine();
 
-    void updateState(const CoffeeMachineMessage &message);
+    bool updateState(const CoffeeMachineMessage &message);
     bool canSendCommand(CoffeeMachineCommand command) const;
     CoffeeMachineState getCurrentState() const;
+    CoffeeOptions getCurrentOptions() const;
 
 private:
     CoffeeMachineState currentState;
     CoffeeMachineMessage currentMessage;
     CoffeeMachineMessage lastMessage;
+    CoffeeOptions coffeeOptions;
 
     // Helper functions
     bool isWaitingForOnState(const CoffeeMachineMessage &message) const;

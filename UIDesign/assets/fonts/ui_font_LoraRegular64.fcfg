@@ -1,0 +1,16 @@
+{
+  "codename": "LoraRegular64",
+  "ttf_path": "/assets/Lora-Regular.ttf",
+  "bin_path": "/assets/ui_font_LoraRegular64.bin",
+  "c_path": "/assets/ui_font_LoraRegular64.c",
+  "cfg_path": "/assets/ui_font_LoraRegular64.fcfg",
+  "size": 64,
+  "bpp": 4,
+  "letters": 0,
+  "ranges": [
+    "0x20-0xff"
+  ],
+  "symbols": "",
+  "customparams": "--no-compress --no-prefilter",
+  "uploaded": false
+}

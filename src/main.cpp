@@ -1,98 +1,81 @@
-#include <Arduino.h>
-#include <HardwareSerial.h>
-#include <CoffeeMachineMessage.h>
-#include <CoffeeMachineController.h>
-#include <MessageLogger.h>
-#include "wManager.h"
-
-#ifndef ESP32_NODISPLAY
-  #include "display.h"
-  #include "ui.h"
-  
-#endif
-uint8_t delay_lvgl = 0;
-
-#ifdef USE_I2C
-  #include <Wire.h>
-  //#include "I2CScanner.h"
-  //I2CScanner scanner;
-  #define VCC_PIN 18 // At display, those pins are in the same connector as the I2C; 17 is unused and 18 is used by the touch circuit for the interrupt signal, but let's try using it to power the I2C.
-  #define GND_PIN 17
-  CoffeeMachineController coffeeController;
-  // I2C Pins on display 19 SDA 20 SCL
-#else
-  #ifndef ESP32C3   
-    #define TX_PIN 13 // Transmit pin: ESP32 TX -> Coffee Machine RX
-    #define RX_PIN 12 // Receive pin:  ESP32 RX <- Coffee Machine TX
-  #else
-    #define TX_PIN 21 // Transmit pin: ESP32 TX -> Coffee Machine RX
-    #define RX_PIN 20 // Receive pin:  ESP32 RX <- Coffee Machine TX
-  #endif
-  HardwareSerial CoffeeSerial(1);
-  CoffeeMachineController coffeeController(CoffeeSerial);
-  // CoffeeMachineController coffeeController(Serial1);
-#endif
-
-
-#define MAX_MESSAGE_LENGTH 256
+#include "main.h"
 
 #if CONFIG_FREERTOS_UNICORE
-  static const BaseType_t app_cpu0 = 0;
-  static const BaseType_t app_cpu1 = 0;
+static const BaseType_t app_cpu0 = 0;
+static const BaseType_t app_cpu1 = 0;
 #else
-  static const BaseType_t app_cpu0 = 0;
-  static const BaseType_t app_cpu1 = 1;
+static const BaseType_t app_cpu0 = 0;
+static const BaseType_t app_cpu1 = 1;
 #endif
-
 
 MessageLogger logger;
 CoffeeMachineMessage currentMessage;
 
+uint8_t delay_lvgl = 0;
+lv_coord_t qrCodeSize = QRCODE_INITIAL_SIZE;
+
+#ifdef ARDUINO_ESP32_DEV
+HardwareSerial CoffeeSerial(0);
+CoffeeMachineController coffeeController(Serial);
+#else
+HardwareSerial CoffeeSerial(1);
+CoffeeMachineController coffeeController(CoffeeSerial);
+#endif
+
 void readAndProcessMessages();
 void runController(void *name);
 
-#ifndef ESP32_NODISPLAY
-void UIController(void *name);
-#endif
+#ifdef DISPLAY_WIDTH
+LightningController Lightning;
+#endif // DISPLAY_WIDTH
 
 void setup()
 {
-  Serial.begin(115200);
-  // while (!Serial)
-  // {
-  //   ; // Wait for Serial Monitor to initialize
-  // }
- #ifndef ESP32_NODISPLAY
-  display_init();
-  delay(100);
+#if ARDUINO_USB_CDC_ON_BOOT == 1
+  delay(5000);
+#endif
 
+#ifndef NO_DEBUG_SERIAL
+  Serial.begin(115200);
+  while (!Serial)
+  {
+    ; // Wait for Serial Monitor to initialize
+  }
+  Serial.println("ESP32 Coffee Machine Logger Starting...");
+#endif // NO_DEBUG_SERIAL
+
+#ifdef ARDUINO_ESP32_DEV
+  Serial.begin(115200, SERIAL_8N1);
+#else
+  CoffeeSerial.begin(115200, SERIAL_8N1, RX_PIN, TX_PIN);
+  while (!CoffeeSerial)
+  {
+    ; // Wait for Serial Monitor to initialize
+  }
+  Serial.println("UART communication with coffee machine initialized.");
+#endif
+
+#ifdef DISPLAY_WIDTH
+  // Initialize SmartDisplay
+  smartdisplay_init();
+
+  // Get Default Display
+  __attribute__((unused)) auto disp = lv_disp_get_default();
+
+  // Set Rotation as needed
+  if (DISPLAY_HEIGHT > DISPLAY_WIDTH)
+  {
+    lv_disp_set_rotation(disp, LV_DISP_ROT_90);
+  }
+
+  // Initialiez UI
   ui_init();
+
   lv_timer_handler();
   vTaskDelay(500 / portTICK_PERIOD_MS);
- #else
-  Wire.begin(19,20);
- #endif
+#endif // DISPLAY_WIDTH
 
- #ifdef USE_I2C
-   /* pinMode(VCC_PIN, OUTPUT);
-   pinMode(GND_PIN, INPUT);
-   digitalWrite(VCC_PIN, HIGH);
-   digitalWrite(GND_PIN, LOW); */
-   Wire.begin();
-   //scanner.Init(); // Use to check connection 
-   //scanner.Scan();
-  #else
-   CoffeeSerial.begin(115200, SERIAL_8N1, RX_PIN, TX_PIN);
-   // Initialize UART communication with the coffee machine
-   Serial.println("UART communication with coffee machine initialized.");     
-  #endif
-  
-  init_WifiManager();
-
-  Serial.println("ESP32 Coffee Machine Logger Starting...");
-
-  delay(1000);
-
+#ifndef NO_DEBUG_SERIAL
   Serial.println("ESP32 Coffee Machine Controller Starting...");
   Serial.println("Enter commands to control the coffee machine:");
   Serial.println("'o' - Turn On");
@@ -103,199 +86,207 @@ void setup()
   Serial.println("'x' - Start/Stop Brewing");
   Serial.println("'t' - Set Strength");
   Serial.println("'q' - Set Quantity");
-  Serial.println("'l' - Last message and status");
+#endif // DEBUG_SERIAL
 
-   // Task to deal with the CoffeMachine Controller, CPU 0
-  char *name = (char*) malloc(32);
+  // Task to deal with the CoffeMachine Controller, CPU 0
+  char *name = (char *)malloc(32);
   sprintf(name, "(%s)", "Controller");
-  BaseType_t res1 = xTaskCreatePinnedToCore(runController, "Controller", 20000, (void*)name, 1, NULL, app_cpu1);
+  xTaskCreatePinnedToCore(runController, "Controller", 10000, (void *)name, 1, NULL, app_cpu1);
 
- #ifndef ESP32_NODISPLAY
+#ifdef DISPLAY_WIDTH
   // Task to deal with the UI, CPU 1
-  char *nameui = (char*) malloc(32);
+  char *nameui = (char *)malloc(32);
   sprintf(nameui, "(%s)", "UIController");
-  BaseType_t res2 = xTaskCreatePinnedToCore(UIController, "UIController", 10000, (void*)nameui, 0, NULL, app_cpu1);
+  xTaskCreatePinnedToCore(UIController, "UIController", 10000, (void *)nameui, 1, NULL, app_cpu1);
   delay(100);
- #endif 
-  // Power on  the machine at start
-  coffeeController.sendCommand(CoffeeMachineCommand::StartStop, 3);
+#endif // DISPLAY_WIDTH
+
+  init_WifiManager();
+
+#ifndef NO_DEBUG_SERIAL
+  Serial.println("WiFi connected.");
+#endif // DEBUG_SERIAL
+
+  Lightning.setOnInvoicePaid(onInvoicePaid);
+  Lightning.websocketInit();
+
+  // Wait for a bit and start the On procedure
+  delay(1000);
 }
 
-void runController(void *name){
+void runController(void *name)
+{
+#ifndef NO_DEBUG_SERIAL
   Serial.println("Coffe Machine Controller started");
+#endif // DEBUG_SERIAL
+
   while (true)
-  {        
+  {
     readAndProcessMessages();
-    // Check for user input from the Serial Monitor
+
+#ifndef NO_DEBUG_SERIAL
     if (Serial.available())
     {
       String input = Serial.readStringUntil('\n'); // Read until newline character
-      input.trim();                               // Remove any leading/trailing whitespace
-      input.toLowerCase();                        // Convert to lowercase for easy comparison
+      input.trim();                                // Remove any leading/trailing whitespace
+      input.toLowerCase();                         // Convert to lowercase for easy comparison
 
       // Map input to commands
       if (input == "o")
       {
         coffeeController.sendOnCommand();
-      } 
+      }
       else if (input == "e")
       {
-        coffeeController.sendCommand(CoffeeMachineCommand::Espresso, 0);
+        coffeeController.sendCommand(CoffeeMachineCommand::Espresso);
       }
       else if (input == "c")
       {
-        coffeeController.sendCommand(CoffeeMachineCommand::Coffee, 0);
+        coffeeController.sendCommand(CoffeeMachineCommand::Coffee);
       }
       else if (input == "h")
       {
-        coffeeController.sendCommand(CoffeeMachineCommand::HotWater, 0);
+        coffeeController.sendCommand(CoffeeMachineCommand::HotWater);
       }
       else if (input == "s")
       {
-        coffeeController.sendCommand(CoffeeMachineCommand::Steam, 0);
-      }      
+        coffeeController.sendCommand(CoffeeMachineCommand::Steam);
+      }
       else if (input == "x")
       {
-        coffeeController.sendCommand(CoffeeMachineCommand::StartStop, 0);
+        coffeeController.sendCommand(CoffeeMachineCommand::StartStop);
       }
       else if (input == "t")
       {
-        coffeeController.sendCommand(CoffeeMachineCommand::Strength, 0);
+        coffeeController.sendCommand(CoffeeMachineCommand::Strength);
       }
       else if (input == "q")
       {
-        coffeeController.sendCommand(CoffeeMachineCommand::Quantity, 0);
-      }      
-      else if (input == "l")
-      {
-        currentMessage.print();
-        Serial.printf("Current Status:%d\n", coffeeController.getCurrentState());
+        coffeeController.sendCommand(CoffeeMachineCommand::Quantity);
       }
       else
       {
         Serial.println("Unknown command. Please enter a valid command.");
       }
     }
-    else
-    {
-     // coffeeController.sendCommand(CoffeeMachineCommand::Status, 0);
-    }
-    delay(10);
-  } // Loop controller
-}
+#endif // DEBUG_SERIAL
 
-#ifndef ESP32_NODISPLAY
-void UIController(void *name){
-  // UI
-  Serial.println("UI Controller started");
-  while(true){    
-    //Serial.print(".");
-    switch (ui_action)
-    {
-    case ui_command::Expresso:
-      coffeeController.sendCommand(CoffeeMachineCommand::Espresso, 0);
-      ui_action = 0;    
-      break;
-    case ui_command::Coffe:
-      coffeeController.sendCommand(CoffeeMachineCommand::Coffee, 0);
-      Serial.printf("pedindo um café!");
-      ui_action = 0;
-      break;
-    case ui_command::StartStop:
-      coffeeController.sendCommand(CoffeeMachineCommand::StartStop, 0);
-      ui_action = 0;
-      break;
-    case ui_command::Cancel:
-      coffeeController.sendCommand(CoffeeMachineCommand::StartStop, 0);
-      ui_action = 0;
-      break;
-    default:
-      break;
-    }
-    // Handle UI state
-    switch (coffeeController.getCurrentState())
-    {
-    case CoffeeMachineState::Loading:
-      lv_obj_clear_flag(ui_errorPanel, LV_OBJ_FLAG_HIDDEN);
-      lv_obj_add_flag(ui_primaryButton, LV_OBJ_FLAG_HIDDEN);
-      lv_obj_add_flag(ui_subtitulo, LV_OBJ_FLAG_HIDDEN);
-      lv_img_set_src(ui_erroIcon, &ui_img_warningsmall_png); 
-      lv_label_set_text(ui_errorMessage, "Maquina aquecendo...");
-      lv_label_set_text(ui_errorDescription, "Aguarde uns instantes.\n");
-      break;
-    case CoffeeMachineState::Ready:
-        lv_obj_clear_flag(ui_primaryButton, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_clear_flag(ui_subtitulo, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_add_flag(ui_errorPanel, LV_OBJ_FLAG_HIDDEN);        
-      break;
-    case CoffeeMachineState::Error:     
-      lv_obj_add_flag(ui_primaryButton, LV_OBJ_FLAG_HIDDEN);
-      lv_obj_clear_flag(ui_errorPanel, LV_OBJ_FLAG_HIDDEN);
-      lv_obj_add_flag(ui_subtitulo, LV_OBJ_FLAG_HIDDEN);
-      if ( currentMessage.noWater) {
-        lv_obj_clear_flag(ui_errorPanel, LV_OBJ_FLAG_HIDDEN);
-        lv_img_set_src(ui_erroIcon, &ui_img_watersmall_png); 
-        lv_label_set_text(ui_errorMessage, "Ops! O reservatório está vazio");
-        lv_label_set_text(ui_errorDescription, "Por favor, adicione água para que possamos preparar o seu café");
-      }
-      if ( currentMessage.cleanTrash) {
-        lv_obj_clear_flag(ui_errorPanel, LV_OBJ_FLAG_HIDDEN);        
-        lv_img_set_src(ui_erroIcon, &ui_img_trashsmall_png); 
-        lv_label_set_text(ui_errorMessage, "Hora de uma limpeza!");
-        lv_label_set_text(ui_errorDescription, "A borra de café precisa ser esvaziada para preparar seu pedido.");
-      }
-      if ( currentMessage.generalWarning) {
-        lv_obj_clear_flag(ui_errorPanel, LV_OBJ_FLAG_HIDDEN);
-        lv_img_set_src(ui_erroIcon, &ui_img_warningsmall_png);
-        lv_label_set_text(ui_errorMessage, "Ops! Estamos com problemas!");
-        lv_label_set_text(ui_errorDescription, "Verifique se a bandeja está cheia ou se o café está no final.");
-      }     
-      break;
-    default:
-      lv_obj_clear_flag(ui_primaryButton, LV_OBJ_FLAG_HIDDEN);
-      lv_obj_clear_flag(ui_subtitulo, LV_OBJ_FLAG_HIDDEN);
-      lv_obj_add_flag(ui_errorPanel, LV_OBJ_FLAG_HIDDEN);
-      break;
-    }   
-    delay_lvgl = lv_timer_handler();
-    vTaskDelay(delay_lvgl+1 / portTICK_PERIOD_MS); 
+    // Allways send the Status Command...
+    coffeeController.sendCommand(CoffeeMachineCommand::Status);
+
+    delay(100); // Stabilize loop
   }
 }
-#endif
+
+#ifdef DISPLAY_WIDTH
+void UIController(void *name)
+{
+// UI
+#ifndef NO_DEBUG_SERIAL
+  Serial.println("UI Controller started");
+#endif // DEBUG_SERIAL
+
+  while (true)
+  {
+    if (Lightning.getIsConnected())
+    {
+      // Handle UI state
+      switch (coffeeController.getCurrentState())
+      {
+      case CoffeeMachineState::Off:
+        coffeeController.sendOnCommand();
+        lv_obj_clear_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_homeButton, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_homeSubTitle, LV_OBJ_FLAG_HIDDEN);
+        lv_img_set_src(ui_homeErrorIcon, &ui_img_warning_png);
+        lv_label_set_text(ui_homeErrorTitle, "Ligando Cafeteira...");
+        lv_label_set_text(ui_homeErrorSubTitle, "Aguarde...\n");
+        break;
+      case CoffeeMachineState::WaitingForOn:
+      case CoffeeMachineState::TurningOn:
+        lv_obj_clear_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_homeButton, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_homeSubTitle, LV_OBJ_FLAG_HIDDEN);
+        lv_img_set_src(ui_homeErrorIcon, &ui_img_trash_png);
+        lv_label_set_text(ui_homeErrorTitle, "Ligando Cafeteira...");
+        lv_label_set_text(ui_homeErrorSubTitle, "Aguarde uns instantes.\n");
+        break;
+      case CoffeeMachineState::Loading:
+        lv_obj_clear_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_homeButton, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_homeSubTitle, LV_OBJ_FLAG_HIDDEN);
+        lv_img_set_src(ui_homeErrorIcon, &ui_img_trash_png);
+        lv_label_set_text(ui_homeErrorTitle, "Maquina aquecendo...");
+        lv_label_set_text(ui_homeErrorSubTitle, "Aguarde uns instantes.\n");
+        break;
+      case CoffeeMachineState::Ready:
+        lv_obj_clear_flag(ui_homeButton, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(ui_homeSubTitle, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
+        break;
+      case CoffeeMachineState::Error:
+        lv_obj_add_flag(ui_homeButton, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_homeSubTitle, LV_OBJ_FLAG_HIDDEN);
+        if (currentMessage.noWater)
+        {
+          lv_obj_clear_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
+          lv_img_set_src(ui_homeErrorIcon, &ui_img_water_png);
+          lv_label_set_text(ui_homeErrorTitle, "Ops! O reservatório está vazio");
+          lv_label_set_text(ui_homeErrorSubTitle, "Por favor, adicione água para que possamos preparar o seu café");
+        }
+        if (currentMessage.cleanTrash)
+        {
+          lv_obj_clear_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
+          lv_img_set_src(ui_homeErrorIcon, &ui_img_trash_png);
+          lv_label_set_text(ui_homeErrorTitle, "Hora de uma limpeza!");
+          lv_label_set_text(ui_homeErrorSubTitle, "A borra de café precisa ser esvaziada para preparar seu pedido.");
+        }
+        if (currentMessage.generalWarning)
+        {
+          lv_obj_clear_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
+          lv_img_set_src(ui_homeErrorIcon, &ui_img_trash_png);
+          lv_label_set_text(ui_homeErrorTitle, "Ops! Estamos com problemas!");
+          lv_label_set_text(ui_homeErrorSubTitle, "Verifique se a bandeja está cheia ou se o café está no final.");
+        }
+        break;
+      default:
+        lv_obj_clear_flag(ui_homeButton, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(ui_homeErrorSubTitle, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
+        break;
+      }
+    }
+    else
+    {
+      lv_obj_clear_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
+      lv_obj_add_flag(ui_homeButton, LV_OBJ_FLAG_HIDDEN);
+      lv_obj_add_flag(ui_homeSubTitle, LV_OBJ_FLAG_HIDDEN);
+      lv_img_set_src(ui_homeErrorIcon, &ui_img_wifi_png);
+      lv_label_set_text(ui_homeErrorTitle, "Conectando ao WiFi e LNBits...");
+      lv_label_set_text(ui_homeErrorSubTitle, "Aguarde...\n");
+    }
+
+    delay_lvgl = lv_timer_handler();
+    vTaskDelay(delay_lvgl + 1 / portTICK_PERIOD_MS);
+  }
+}
+#endif // DISPLAY_WIDTH
 
 void loop()
-{    
-  //delay(100);
-  vTaskDelay(delay_lvgl+1 / portTICK_PERIOD_MS); 
+{
+  Lightning.websocketLoop();
+  vTaskDelay(delay_lvgl + 1 / portTICK_PERIOD_MS);
 }
 
 void readAndProcessMessages()
 {
-  static uint8_t messageBuffer[256];
+  static uint8_t messageBuffer[19];
   static size_t messageIndex = 0;
 
-#ifdef USE_I2C  
-  uint8_t bytesReceived = Wire.requestFrom(COFFEMACHINE_I2C_ADDR, 19);
-  vTaskDelay(500 / portTICK_PERIOD_MS);
-  Serial.printf("requestFrom: %u\n", bytesReceived);
-  uint8_t temp[20] = {0};
-  if((bool)bytesReceived){ //If received more than zero bytes    
-    Wire.readBytes(temp, bytesReceived);
-    //log_print_buf(temp, bytesReceived);
-  } 
-  if (bytesReceived > 0)
-  //while (Wire.available())
-  for (int i=0;i<bytesReceived;i++)
-  {    
-    uint8_t incomingByte = temp[i]; // Wire.read();
-    if (incomingByte == 0xFF) {
-      continue;
-    } // else Serial.print(incomingByte, HEX);
-#else
   while (CoffeeSerial.available())
   {
     uint8_t incomingByte = CoffeeSerial.read();
-#endif
     // Assemble the message as before
     if (messageIndex == 0 && incomingByte != 0xD5)
     {
@@ -318,17 +309,142 @@ void readAndProcessMessages()
         messageIndex = 0;
         continue;
       }
-    }    
+    }
 
     // Assuming fixed message length of 19 bytes
     if (messageIndex >= 19)
     {
+      logger.logMessage(Sender::CoffeeMachine, messageBuffer, 19);
+
       CoffeeMachineMessage message(messageBuffer, 19);
       currentMessage = message;
       coffeeController.updateState(message);
-      logger.logMessage(Sender::CoffeeMachine, messageBuffer, 19);
+
       messageIndex = 0;
     }
   }
-  // delay(100);
+}
+
+void showQrCode(uint8_t buttonNumber, lv_coord_t size)
+{
+  // Create and update QR code
+  auto ui_qrcode = lv_qrcode_create(ui_qrCodeContainer, size ? size : QRCODE_INITIAL_SIZE, lv_color_black(), lv_color_white());
+  String qrData = buttonNumber == 1 ? Lightning.button1Lnurl : Lightning.button2Lnurl;
+  lv_qrcode_update(ui_qrcode, qrData.c_str(), qrData.length());
+  lv_obj_center(ui_qrcode);
+}
+
+void generateQrCode(uint8_t buttonNumber)
+{
+  if (qrCodeSize <= QRCODE_INITIAL_SIZE)
+  {
+    static uint32_t startTime;
+    static uint8_t timerButtonNumber;
+
+    // Allocate and initialize timer data
+    startTime = millis();
+    timerButtonNumber = buttonNumber;
+
+    // Create a one-shot timer that will generate the QR code after the screen is loaded
+    // Create timer that will generate the QR code after the screen is loaded
+    __attribute__((unused)) lv_timer_t *timer = lv_timer_create([](lv_timer_t *timer)
+                                                                {            
+            qrCodeSize = lv_obj_get_content_width(ui_qrCodeContainer) - 5;
+            
+            if (qrCodeSize > QRCODE_INITIAL_SIZE) {
+                showQrCode(timerButtonNumber, qrCodeSize);
+                lv_timer_del(timer);
+            } else {
+                if (millis() - startTime >= 2000) {  // 2 second timeout
+                    lv_timer_del(timer);
+                    qrCodeSize = QRCODE_INITIAL_SIZE;
+                }
+            } }, 100, NULL); // 100ms interval
+  }
+  else
+  {
+    showQrCode(buttonNumber, qrCodeSize);
+  }
+}
+
+void chooseButton1Clicked(lv_event_t *e)
+{
+  isWaitingPayment = 1;
+  coffeeController.selectCoffee(CoffeeType::ESPRESSO);
+  _ui_screen_change(&ui_payment, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_payment_screen_init);
+
+  lv_timer_create([](lv_timer_t *timer)
+                  {
+                    generateQrCode(1);
+                    lv_timer_del(timer); // Delete the timer after use
+                  },
+                  100, nullptr); // 100ms delay
+}
+
+void chooseButton2Clicked(lv_event_t *e)
+{
+  isWaitingPayment = 2;
+  coffeeController.selectCoffee(CoffeeType::COFFEE);
+  _ui_screen_change(&ui_payment, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_payment_screen_init);
+
+  lv_timer_create([](lv_timer_t *timer)
+                  {
+                    generateQrCode(2);
+                    lv_timer_del(timer); // Delete the timer after use
+                  },
+                  100, nullptr); // 100ms delay
+}
+
+void chooseBackButtonClicked(lv_event_t *e)
+{
+  coffeeController.selectCoffee(CoffeeType::NONE);
+  _ui_screen_change(&ui_home, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_home_screen_init);
+}
+
+void paymentBackButtonClicked(lv_event_t *e)
+{
+  coffeeController.selectCoffee(CoffeeType::NONE);
+  _ui_screen_change(&ui_choose, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_choose_screen_init);
+  clearQrCode();
+}
+
+void preparingCancelButtonClicked(lv_event_t *e)
+{
+  coffeeController.selectCoffee(CoffeeType::NONE);
+  coffeeController.sendCommand(CoffeeMachineCommand::StartStop);
+
+  _ui_screen_change(&ui_choose, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_choose_screen_init);
+}
+
+void successPanelButtonClicked(lv_event_t *e)
+{
+  _ui_screen_change(&ui_home, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_home_screen_init);
+}
+
+void clearQrCode()
+{
+  lv_timer_create([](lv_timer_t *timer)
+                  {
+                    lv_obj_clean(ui_qrCodeContainer);
+                    lv_timer_del(timer); // Delete the timer after use
+                  },
+                  500, nullptr); // 500ms delay
+}
+
+void onInvoicePaid(uint8_t type)
+{
+  if (isWaitingPayment == type)
+  {
+    isWaitingPayment = 0;
+    _ui_screen_change(&ui_preparing, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_preparing_screen_init);
+    clearQrCode();
+    coffeeController.startOrder();
+  }
+  else
+  {
+#ifndef NO_DEBUG_SERIAL
+    Serial.printf("Invoice paid for: %d\n", type);
+#endif // DEBUG_SERIAL
+    return;
+  }
 }

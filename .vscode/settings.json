@@ -11,6 +11,13 @@
         "vector": "cpp",
         "string_view": "cpp",
         "initializer_list": "cpp",
-        "*.tpp": "cpp"
+        "*.tpp": "cpp",
+        "list": "cpp",
+        "regex": "cpp",
+        "*.tcc": "cpp",
+        "fstream": "cpp",
+        "ui_extended.h": "c",
+        "ui_helpers.h": "c",
+        "utility": "cpp"
     }
 }

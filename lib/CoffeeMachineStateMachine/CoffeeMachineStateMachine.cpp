@@ -1,72 +1,85 @@
 #include "CoffeeMachineStateMachine.h"
 
-CoffeeMachineStateMachine::CoffeeMachineStateMachine()
-    : currentState(CoffeeMachineState::Off)
+CoffeeMachineStateMachine::CoffeeMachineStateMachine() : currentState(CoffeeMachineState::Off)
 {
 }
 
-void CoffeeMachineStateMachine::updateState(const CoffeeMachineMessage &message)
+bool CoffeeMachineStateMachine::updateState(const CoffeeMachineMessage &message)
 {
     if (currentMessage == message)
-        return;
+        return false;
 
     lastMessage = currentMessage;
     currentMessage = message;
 
-    Serial.print("Current State: ");
-
     if (isWaitingForOnState(message))
     {
         currentState = CoffeeMachineState::WaitingForOn;
-        Serial.println("Waiting for On");
     }
     else if (isTurningOnState(message))
     {
         currentState = CoffeeMachineState::TurningOn;
-        Serial.println("Turning On");
     }
     else if (isErrorState(message))
     {
         currentState = CoffeeMachineState::Error;
-        Serial.println("Error");
     }
     else if (isBrewingState(message, lastMessage))
     {
         currentState = CoffeeMachineState::Brewing;
-        Serial.println("Brewing");
     }
     else if (isReadyState(message))
     {
         currentState = CoffeeMachineState::Ready;
-        Serial.println("Ready");
     }
     else if (isSelectedState(message, lastMessage))
     {
         currentState = CoffeeMachineState::Selected;
-        Serial.print("Selected: ");
+
+        Serial.print("Selected:");
+
         if (message.ledCoffee != 0x00)
         {
-            Serial.print(message.ledCoffee);
-            Serial.print(" Cafe - ");
+            coffeeOptions.type = CoffeeType::COFFEE;
+            coffeeOptions.quantity = message.ledCoffee;
+            Serial.printf(" %d Cafe - ", message.ledCoffee);
         }
         else if (message.ledEspresso != 0x00)
         {
-            Serial.print(message.ledEspresso);
-            Serial.print(" Espresso - ");
+            coffeeOptions.type = CoffeeType::ESPRESSO;
+            coffeeOptions.quantity = message.ledEspresso;
+            Serial.printf(" %d Espresso - ", message.ledEspresso);
         }
         else if (message.ledHotWater)
         {
-            Serial.print("Cha - ");
+            coffeeOptions.type = CoffeeType::NONE;
+            Serial.print(" Cha - ");
         }
         else if (message.ledSteam)
         {
-            Serial.print("Vapor");
+            coffeeOptions.type = CoffeeType::NONE;
+            Serial.print(" Vapor");
         }
 
         if (message.ledCoffee != 0x00 || message.ledEspresso != 0x00 || message.ledHotWater)
         {
-            Serial.print(message.quantity);
-            Serial.print(" ");
+            switch (message.quantity)
+            {
+            case 1:
+                coffeeOptions.size = SizeLevel::SMALL;
+                Serial.print("pequeno | ");
+                break;
+            case 2:
+                coffeeOptions.size = SizeLevel::MEDIUM;
+                Serial.print("médio | ");
+                break;
+            case 3:
+                coffeeOptions.size = SizeLevel::LARGE;
+                Serial.print("grande | ");
+                break;
+            default:
+                break;
+            }
         }
 
         if (message.ledCoffee != 0x00 || message.ledEspresso != 0x00)
@@ -74,30 +87,34 @@ void CoffeeMachineStateMachine::updateState(const CoffeeMachineMessage &message)
             switch (message.coffeeStrength)
             {
             case 1:
+                coffeeOptions.strength = StrengthLevel::MILD;
                 Serial.print("fraco");
                 break;
             case 2:
-                Serial.print("médio");
+                coffeeOptions.strength = StrengthLevel::MEDIUM;
+                Serial.print("normal");
                 break;
             case 3:
+                coffeeOptions.strength = StrengthLevel::STRONG;
                 Serial.print("forte");
                 break;
             }
         }
 
-        Serial.println();
+        Serial.println("");
     }
     else if (isLoadingState(message))
     {
         currentState = CoffeeMachineState::Loading;
-        Serial.println("Loading");
     }
     else
     {
+        Serial.println("State is unknown, setting Loading.");
         // Default to Loading if no state matches
         currentState = CoffeeMachineState::Loading;
-        Serial.println("State Unknown");
     }
+
+    return true;
 }
 
 bool CoffeeMachineStateMachine::canSendCommand(CoffeeMachineCommand command) const
@@ -138,7 +155,7 @@ bool CoffeeMachineStateMachine::canSendCommand(CoffeeMachineCommand command) con
             {
                 return command == CoffeeMachineCommand::Quantity;
             }
-            else if (lastMessage.ledCoffee != 0x00 || lastMessage.ledEspresso != 0x00)
+            else if (coffeeOptions.type == CoffeeType::COFFEE || coffeeOptions.type == CoffeeType::ESPRESSO)
             {
                 return command == CoffeeMachineCommand::Quantity || command == CoffeeMachineCommand::Strength;
             }
@@ -158,6 +175,11 @@ bool CoffeeMachineStateMachine::canSendCommand(CoffeeMachineCommand command) con
 CoffeeMachineState CoffeeMachineStateMachine::getCurrentState() const
 {
     return currentState;
+}
+
+CoffeeOptions CoffeeMachineStateMachine::getCurrentOptions() const
+{
+    return coffeeOptions;
 }
 
 bool CoffeeMachineStateMachine::isWaitingForOnState(const CoffeeMachineMessage &message) const
@@ -184,11 +206,13 @@ bool CoffeeMachineStateMachine::isReadyState(const CoffeeMachineMessage &message
 bool CoffeeMachineStateMachine::isSelectedState(const CoffeeMachineMessage &message, const CoffeeMachineMessage &lastMessage) const
 {
     // Check if any selection is made
-    bool selectionMade = (message.ledEspresso == 0x01 || message.ledEspresso == 0x02 ||
-                          message.ledCoffee == 0x01 || message.ledCoffee == 0x02 ||
+    bool selectionMade = (message.ledEspresso == 1 || message.ledEspresso == 2 ||
+                          message.ledCoffee == 1 || message.ledCoffee == 2 ||
                           message.ledHotWater || message.ledSteam);
+    bool sizeAndStrength = (message.coffeeStrength != 0 || message.quantity != 0);
     bool isPlayBlinking = message.play != lastMessage.play;
-    return selectionMade && isPlayBlinking;
+    Serial.printf("SelectionMade: %d SizeAndStrength: %d IsPlayBlinking: %d\n", (int)selectionMade, (int)sizeAndStrength, (int)isPlayBlinking);
+    return selectionMade && (isPlayBlinking || sizeAndStrength);
 }
 
 bool CoffeeMachineStateMachine::isBrewingState(const CoffeeMachineMessage &message, const CoffeeMachineMessage &lastMessage) const
