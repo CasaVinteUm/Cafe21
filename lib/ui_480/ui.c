@@ -13,7 +13,6 @@
 void ui_home_screen_init(void);
 lv_obj_t *ui_home;
 lv_obj_t *ui_homeLogo;
-lv_obj_t *ui_homeConfig;
 lv_obj_t *ui_homeContainerTitle;
 lv_obj_t *ui_homeTitle;
 lv_obj_t *ui_homeSubTitle;
@@ -24,6 +23,8 @@ lv_obj_t *ui_homeErrorPanel;
 lv_obj_t *ui_homeErrorIcon;
 lv_obj_t *ui_homeErrorTitle;
 lv_obj_t *ui_homeErrorSubTitle;
+void ui_event_homeConfig( lv_event_t * e);
+lv_obj_t *ui_homeConfig;
 // CUSTOM VARIABLES
 
 
@@ -97,6 +98,30 @@ lv_obj_t *ui_successPanelTitle;
 lv_obj_t *ui_sucessPanelImage;
 // CUSTOM VARIABLES
 
+
+// SCREEN: ui_config
+void ui_config_screen_init(void);
+lv_obj_t *ui_config;
+lv_obj_t *ui_configPanel;
+void ui_event_configButtonEspresso( lv_event_t * e);
+lv_obj_t *ui_configButtonEspresso;
+lv_obj_t *ui_configButtonEspressoLabel;
+void ui_event_configButtonCoffee( lv_event_t * e);
+lv_obj_t *ui_configButtonCoffee;
+lv_obj_t *ui_configButtonCoffeeLabel;
+void ui_event_configButtonReset( lv_event_t * e);
+lv_obj_t *ui_configButtonReset;
+lv_obj_t *ui_configButtonResetLabel;
+void ui_event_configButtonBack( lv_event_t * e);
+lv_obj_t *ui_configButtonBack;
+lv_obj_t *ui_configButtonBackLabel;
+lv_obj_t *ui_configPasswordPanel;
+lv_obj_t *ui_configPasswordLabel;
+lv_obj_t *ui_configPasswordText;
+void ui_event_configPasswordKeyboard( lv_event_t * e);
+lv_obj_t *ui_configPasswordKeyboard;
+// CUSTOM VARIABLES
+
 // EVENTS
 lv_obj_t *ui____initial_actions0;
 
@@ -119,6 +144,14 @@ void ui_event_homeButton( lv_event_t * e) {
 
 if ( event_code == LV_EVENT_CLICKED) {
       _ui_screen_change( &ui_choose, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_choose_screen_init);
+}
+}
+
+void ui_event_homeConfig( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+if ( event_code == LV_EVENT_CLICKED) {
+      homeConfigClicked( e );
 }
 }
 
@@ -206,6 +239,46 @@ if ( event_code == LV_EVENT_CLICKED) {
 }
 }
 
+void ui_event_configButtonEspresso( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+if ( event_code == LV_EVENT_CLICKED) {
+      configButtonEspressoClicked( e );
+}
+}
+
+void ui_event_configButtonCoffee( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+if ( event_code == LV_EVENT_CLICKED) {
+      configButtonCoffeeClicked( e );
+}
+}
+
+void ui_event_configButtonReset( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+if ( event_code == LV_EVENT_CLICKED) {
+      configButtonResetClicked( e );
+}
+}
+
+void ui_event_configButtonBack( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+if ( event_code == LV_EVENT_CLICKED) {
+      configButtonBackClicked( e );
+}
+}
+
+void ui_event_configPasswordKeyboard( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+if ( event_code == LV_EVENT_VALUE_CHANGED) {
+      configPasswordKeyboardValueChanged( e );
+}
+}
+
 ///////////////////// SCREENS ////////////////////
 
 void ui_init( void )
@@ -218,6 +291,7 @@ ui_choose_screen_init();
 ui_payment_screen_init();
 ui_preparing_screen_init();
 ui_success_screen_init();
+ui_config_screen_init();
 ui____initial_actions0 = lv_obj_create(NULL);
 lv_disp_load_scr( ui_home);
 }
