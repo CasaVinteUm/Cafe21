@@ -1,7 +1,7 @@
 #include "CoffeeMachineController.h"
 
-CoffeeMachineController::CoffeeMachineController(HardwareSerial &serial)
-    : serialPort(serial), waitingForOnState(false), onStateCounter(0)
+CoffeeMachineController::CoffeeMachineController(HardwareSerial &serial, MessageLogger &logger)
+    : serialPort(serial), logger(logger), waitingForOnState(false), onStateCounter(0)
 {
 }
 
@@ -12,96 +12,60 @@ void CoffeeMachineController::updateState(const CoffeeMachineMessage &message)
         CoffeeMachineState currState = stateMachine.getCurrentState();
         CoffeeOptions options = stateMachine.getCurrentOptions();
 
-#ifndef NO_DEBUG_SERIAL
-        Serial.printf("Current State: %s\n", coffeeMachineStateString(currState).c_str());
-#endif // DEBUG_SERIAL
-
+        log_d("Current State: %s", coffeeMachineStateString(currState));
         if (isSelectingOrder)
         {
-#ifndef NO_DEBUG_SERIAL
-            Serial.println("We're selecting the order...");
-#endif // DEBUG_SERIAL
+            log_v("Sending commands according to the order");
             if (currState == CoffeeMachineState::Brewing)
             {
                 isSelectingOrder = false;
                 return;
             }
 
-#ifndef NO_DEBUG_SERIAL
-            Serial.println("We're not brewing yet...");
-#endif // DEBUG_SERIAL
-
+            log_v("Not brewing yet");
             if (currState != CoffeeMachineState::Selected || options.type != selectedType || options.quantity != 1)
             {
-#ifndef NO_DEBUG_SERIAL
-                Serial.printf("Type is: %d & quantity is: %d\n", (int)options.type, (int)options.quantity);
-#endif // DEBUG_SERIAL
-
+                log_d("Type is: %s & quantity is: %d", coffeeTypeString(options.type), options.quantity);
                 if (!sendCommand(selectedType == CoffeeType::COFFEE ? CoffeeMachineCommand::Coffee : CoffeeMachineCommand::Espresso))
                 {
-#ifndef NO_DEBUG_SERIAL
-                    Serial.println("Error sending Coffee command");
-#endif // DEBUG_SERIAL
+                    log_e("Error sending beverage selection command for %s", coffeeTypeString(selectedType));
                 }
 
                 return;
             }
 
-#ifndef NO_DEBUG_SERIAL
-            Serial.println("We have the right type and quantity...");
-#endif // DEBUG_SERIAL
-
+            log_v("Type and quantity are correct");
             if (options.strength != StrengthLevel::STRONG)
             {
-#ifndef NO_DEBUG_SERIAL
-                Serial.printf("Strength is: %d\n", (int)options.strength);
-#endif // DEBUG_SERIAL
-
+                log_d("Strength is: %s", coffeeStrengthLevelString(options.strength));
                 if (!sendCommand(CoffeeMachineCommand::Strength))
                 {
-#ifndef NO_DEBUG_SERIAL
-                    Serial.println("Error sending strength command");
-#endif // DEBUG_SERIAL
+                    log_e("Error sending strength command");
                 }
 
                 return;
             }
 
-#ifndef NO_DEBUG_SERIAL
-            Serial.println("We have the right stength...");
-#endif // DEBUG_SERIAL
-
+            log_v("Stength is correct");
             if (options.size != SizeLevel::MEDIUM)
             {
-#ifndef NO_DEBUG_SERIAL
-                Serial.printf("Size is: %d\n", options.size);
-#endif // DEBUG_SERIAL
-
+                log_d("Size is: %s\n", coffeeSizeLevelString(options.size));
                 if (!sendCommand(CoffeeMachineCommand::Quantity))
                 {
-#ifndef NO_DEBUG_SERIAL
-                    Serial.println("Error sending size command");
-#endif // DEBUG_SERIAL
+                    log_e("Error sending size command");
                 }
 
                 return;
             }
 
-#ifndef NO_DEBUG_SERIAL
-            Serial.println("We have the right size. Let's brew!");
-#endif // DEBUG_SERIAL
-
+            log_d("Sending StartStop command");
             if (!sendCommand(CoffeeMachineCommand::StartStop))
             {
-#ifndef NO_DEBUG_SERIAL
-                Serial.println("Error sending start command");
-#endif // DEBUG_SERIAL
+                log_e("Error sending start command");
                 return;
             }
 
-#ifndef NO_DEBUG_SERIAL
-            Serial.println("Start sent successfully...");
-#endif // DEBUG_SERIAL
+            log_d("StartStop command sent successfully");
         }
     }
 }
@@ -112,8 +76,8 @@ bool CoffeeMachineController::sendOnCommand()
     {
         waitingForOnState = true;
     }
-    CoffeeMachineState currState = stateMachine.getCurrentState();
 
+    CoffeeMachineState currState = stateMachine.getCurrentState();
     if (onStateCounter < 10 && currState == CoffeeMachineState::Off)
     {
         onStateCounter++;
@@ -146,9 +110,7 @@ bool CoffeeMachineController::sendCommand(CoffeeMachineCommand command)
             sendCommandMessage(command);
             if (command != CoffeeMachineCommand::Status)
             {
-#ifndef NO_DEBUG_SERIAL
-                Serial.printf("Command: %s sent successfully.\n", coffeeMachineCommandString(command).c_str());
-#endif // DEBUG_SERIAL
+                log_d("Command: %s sent successfully.", coffeeMachineCommandString(command));
             }
             return true;
         }
@@ -157,11 +119,7 @@ bool CoffeeMachineController::sendCommand(CoffeeMachineCommand command)
             CoffeeMachineState currState = stateMachine.getCurrentState();
             if (currState != CoffeeMachineState::Off)
             {
-#ifndef NO_DEBUG_SERIAL
-                Serial.printf("Command: %s not allowed in the current state: %s\n",
-                              coffeeMachineCommandString(command).c_str(),
-                              coffeeMachineStateString(currState).c_str());
-#endif // DEBUG_SERIAL
+                log_e("Command %s not allowed in the current state %s", coffeeMachineCommandString(command), coffeeMachineStateString(currState));
             }
             return false;
         }
@@ -251,6 +209,8 @@ void CoffeeMachineController::sendCommandMessage(CoffeeMachineCommand command)
 
     // Send the message
     serialPort.write(message, 12);
+
+    logger.logMessage(Sender::Panel, message, 12, false);
 }
 
 void CoffeeMachineController::selectCoffee(CoffeeType type)
@@ -267,14 +227,12 @@ void CoffeeMachineController::startOrder()
         // Send command to select the right type of coffee
         if (!sendCommand(selectedType == CoffeeType::COFFEE ? CoffeeMachineCommand::Coffee : CoffeeMachineCommand::Espresso))
         {
-#ifndef NO_DEBUG_SERIAL
-            Serial.println("Error sending selection command");
-#endif // DEBUG_SERIAL
+            log_e("Error sending selection command");
         }
     }
 }
 
-std::string CoffeeMachineController::coffeeMachineStateString(CoffeeMachineState state)
+const char *CoffeeMachineController::coffeeMachineStateString(CoffeeMachineState state)
 {
     switch (state)
     {
@@ -297,7 +255,7 @@ std::string CoffeeMachineController::coffeeMachineStateString(CoffeeMachineState
     }
 }
 
-std::string CoffeeMachineController::coffeeMachineCommandString(CoffeeMachineCommand command)
+const char *CoffeeMachineController::coffeeMachineCommandString(CoffeeMachineCommand command)
 {
     switch (command)
     {
@@ -321,6 +279,51 @@ std::string CoffeeMachineController::coffeeMachineCommandString(CoffeeMachineCom
         return "Quantity";
     case CoffeeMachineCommand::Status:
         return "Status";
+    default:
+        return "Unknown";
+    }
+}
+
+const char *CoffeeMachineController::coffeeTypeString(CoffeeType type)
+{
+    switch (type)
+    {
+    case CoffeeType::COFFEE:
+        return "Coffee";
+    case CoffeeType::ESPRESSO:
+        return "Espresso";
+    case CoffeeType::NONE:
+        return "None";
+    default:
+        return "Unknown";
+    }
+}
+
+const char *CoffeeMachineController::coffeeSizeLevelString(SizeLevel size)
+{
+    switch (size)
+    {
+    case SizeLevel::LARGE:
+        return "Large";
+    case SizeLevel::MEDIUM:
+        return "Medium";
+    case SizeLevel::SMALL:
+        return "Small";
+    default:
+        return "Unknown";
+    }
+}
+
+const char *CoffeeMachineController::coffeeStrengthLevelString(StrengthLevel strength)
+{
+    switch (strength)
+    {
+    case StrengthLevel::MEDIUM:
+        return "Medium";
+    case StrengthLevel::MILD:
+        return "Mild";
+    case StrengthLevel::STRONG:
+        return "Strong";
     default:
         return "Unknown";
     }

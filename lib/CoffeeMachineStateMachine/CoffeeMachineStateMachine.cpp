@@ -36,29 +36,23 @@ bool CoffeeMachineStateMachine::updateState(const CoffeeMachineMessage &message)
     {
         currentState = CoffeeMachineState::Selected;
 
-        Serial.print("Selected:");
-
         if (message.ledCoffee != 0x00)
         {
             coffeeOptions.type = CoffeeType::COFFEE;
             coffeeOptions.quantity = message.ledCoffee;
-            Serial.printf(" %d Cafe - ", message.ledCoffee);
         }
         else if (message.ledEspresso != 0x00)
         {
             coffeeOptions.type = CoffeeType::ESPRESSO;
             coffeeOptions.quantity = message.ledEspresso;
-            Serial.printf(" %d Espresso - ", message.ledEspresso);
         }
         else if (message.ledHotWater)
         {
             coffeeOptions.type = CoffeeType::NONE;
-            Serial.print(" Cha - ");
         }
         else if (message.ledSteam)
         {
             coffeeOptions.type = CoffeeType::NONE;
-            Serial.print(" Vapor");
         }
 
         if (message.ledCoffee != 0x00 || message.ledEspresso != 0x00 || message.ledHotWater)
@@ -67,15 +61,12 @@ bool CoffeeMachineStateMachine::updateState(const CoffeeMachineMessage &message)
             {
             case 1:
                 coffeeOptions.size = SizeLevel::SMALL;
-                Serial.print("pequeno | ");
                 break;
             case 2:
                 coffeeOptions.size = SizeLevel::MEDIUM;
-                Serial.print("médio | ");
                 break;
             case 3:
                 coffeeOptions.size = SizeLevel::LARGE;
-                Serial.print("grande | ");
                 break;
             default:
                 break;
@@ -88,20 +79,15 @@ bool CoffeeMachineStateMachine::updateState(const CoffeeMachineMessage &message)
             {
             case 1:
                 coffeeOptions.strength = StrengthLevel::MILD;
-                Serial.print("fraco");
                 break;
             case 2:
                 coffeeOptions.strength = StrengthLevel::MEDIUM;
-                Serial.print("normal");
                 break;
             case 3:
                 coffeeOptions.strength = StrengthLevel::STRONG;
-                Serial.print("forte");
                 break;
             }
         }
-
-        Serial.println("");
     }
     else if (isLoadingState(message))
     {
@@ -109,7 +95,7 @@ bool CoffeeMachineStateMachine::updateState(const CoffeeMachineMessage &message)
     }
     else
     {
-        Serial.println("State is unknown, setting Loading.");
+        log_d("State is unknown, setting Loading.");
         // Default to Loading if no state matches
         currentState = CoffeeMachineState::Loading;
     }
@@ -211,7 +197,6 @@ bool CoffeeMachineStateMachine::isSelectedState(const CoffeeMachineMessage &mess
                           message.ledHotWater || message.ledSteam);
     bool sizeAndStrength = (message.coffeeStrength != 0 || message.quantity != 0);
     bool isPlayBlinking = message.play != lastMessage.play;
-    Serial.printf("SelectionMade: %d SizeAndStrength: %d IsPlayBlinking: %d\n", (int)selectionMade, (int)sizeAndStrength, (int)isPlayBlinking);
     return selectionMade && (isPlayBlinking || sizeAndStrength);
 }
 

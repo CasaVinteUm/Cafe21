@@ -30,9 +30,7 @@ WiFiManager wm;
 void saveConfigFile()
 // Save Config in JSON format
 {
-#ifndef NO_DEBUG_SERIAL
-  Serial.println(F("Salvando configuração..."));
-#endif // NO_DEBUG_SERIAL
+  log_d("Salvando configuração...");
   // Create a JSON document
   StaticJsonDocument<512> json;
   json["wmLNBitsServer"] = wmLNBitsServer;
@@ -48,23 +46,19 @@ void saveConfigFile()
 
   // Open config file
   File configFile = SPIFFS.open(JSON_CONFIG_FILE, "w");
-#ifndef NO_DEBUG_SERIAL
   if (!configFile)
   {
     // Error, file did not open
-    Serial.println("failed to open config file for writing");
+    log_e("failed to open config file for writing");
   }
-#endif // NO_DEBUG_SERIAL
 
   // Serialize JSON data to write to file
   serializeJsonPretty(json, Serial);
-#ifndef NO_DEBUG_SERIAL
   if (serializeJson(json, configFile) == 0)
   {
     // Error writing file
-    Serial.println(F("Failed to write to file"));
+    log_e("Failed to write to file");
   }
-#endif // NO_DEBUG_SERIAL
   // Close file
   configFile.close();
 }
@@ -72,40 +66,30 @@ void saveConfigFile()
 bool loadConfigFile()
 // Load existing configuration file
 {
-// Uncomment if we need to format filesystem
-// SPIFFS.format();
+  // Uncomment if we need to format filesystem
+  // SPIFFS.format();
 
-// Read configuration from FS json
-#ifndef NO_DEBUG_SERIAL
-  Serial.println("Mounting File System...");
-#endif // NO_DEBUG_SERIAL
+  // Read configuration from FS json
+  log_d("Mounting File System...");
   // May need to make it begin(true) first time you are using SPIFFS
   if (SPIFFS.begin(false) || SPIFFS.begin(true))
   {
-#ifndef NO_DEBUG_SERIAL
-    Serial.println("mounted file system");
-#endif // NO_DEBUG_SERIAL
+    log_d("mounted file system");
     if (SPIFFS.exists(JSON_CONFIG_FILE))
     {
-#ifndef NO_DEBUG_SERIAL
       // The file exists, reading and loading
-      Serial.println("reading config file");
-#endif // NO_DEBUG_SERIAL
+      log_d("reading config file");
       File configFile = SPIFFS.open(JSON_CONFIG_FILE, "r");
       if (configFile)
       {
-#ifndef NO_DEBUG_SERIAL
-        Serial.println("Opened configuration file");
-#endif // NO_DEBUG_SERIAL
+        log_d("Opened configuration file");
         StaticJsonDocument<512> json;
         DeserializationError error = deserializeJson(json, configFile);
         configFile.close();
         serializeJsonPretty(json, Serial);
         if (!error)
         {
-#ifndef NO_DEBUG_SERIAL
-          Serial.println("Parsing JSON");
-#endif // NO_DEBUG_SERIAL
+          log_v("Parsing JSON");
           strcpy(wmLNBitsServer, json["wmLNBitsServer"]);
           // strcpy(wmDeviceId, json["wmDeviceId"]);
           // strcpy(wmLNApiKey, json["wmLNApiKey"]);
@@ -115,28 +99,22 @@ bool loadConfigFile()
           wmValue = json["wmValue"].as<float>();
           wmvalueSatsC = json["wmvalueSatsC"].as<int>();
           wmValueC = json["wmValueC"].as<float>();
-#ifndef NO_DEBUG_SERIAL
-          Serial.println("Parsing JSON - END!");
-#endif // NO_DEBUG_SERIAL
+          log_v("Parsing JSON - END!");
           return true;
         }
-#ifndef NO_DEBUG_SERIAL
         else
         {
           // Error loading JSON data
-          Serial.println("Failed to load json config");
+          log_e("Failed to load json config");
         }
-#endif // NO_DEBUG_SERIAL
       }
     }
   }
-#ifndef NO_DEBUG_SERIAL
   else
   {
     // Error mounting file system
-    Serial.println("Failed to mount FS");
+    log_e("Failed to mount FS");
   }
-#endif // NO_DEBUG_SERIAL
 
   return false;
 }
@@ -144,9 +122,7 @@ bool loadConfigFile()
 void saveConfigCallback()
 // Callback notifying us of the need to save configuration
 {
-#ifndef NO_DEBUG_SERIAL
-  Serial.println("Should save config");
-#endif // NO_DEBUG_SERIAL
+  log_d("Should save config");
   shouldSaveConfig = true;
   // wm.setConfigPortalBlocking(false);
 }
@@ -154,15 +130,9 @@ void saveConfigCallback()
 void configModeCallback(WiFiManager *myWiFiManager)
 // Called when config mode launched
 {
-#ifndef NO_DEBUG_SERIAL
-  Serial.println("Entered Configuration Mode");
-
-  Serial.print("Config SSID: ");
-  Serial.println(myWiFiManager->getConfigPortalSSID());
-
-  Serial.print("Config IP Address: ");
-  Serial.println(WiFi.softAPIP());
-#endif // NO_DEBUG_SERIAL
+  log_d("Entered Configuration Mode");
+  log_d("Config SSID: %s", myWiFiManager->getConfigPortalSSID());
+  log_d("Config IP Address: %s", WiFi.softAPIP());
 }
 
 void init_WifiManager()
@@ -174,9 +144,7 @@ void init_WifiManager()
   bool spiffsSetup = loadConfigFile();
   if (!spiffsSetup)
   {
-#ifndef NO_DEBUG_SERIAL
-    Serial.println(F("Forcing config mode as there is no saved config"));
-#endif // NO_DEBUG_SERIAL
+    log_w("Forcing config mode as there is no saved config");
     forceConfig = true;
   }
 
@@ -250,23 +218,17 @@ void init_WifiManager()
   wm.addParameter(&valueSats);
   wm.addParameter(&valueFiatC);
   wm.addParameter(&valueSatsC);
-#ifndef NO_DEBUG_SERIAL
-  Serial.println("All Parameters done: ");
-#endif // NO_DEBUG_SERIAL
+  log_d("All Parameters done: ");
 
   if (forceConfig)
   // Run if we need a configuration
   {
-#ifndef NO_DEBUG_SERIAL
-    Serial.println("Force Config...");
-#endif // NO_DEBUG_SERIAL
+    log_w("Force Config...");
     // No configuramos timeout al modulo
     wm.setConfigPortalBlocking(true); // Hacemos que el portal SI bloquee el firmware
     if (!wm.startConfigPortal(wmSSID, wmPASSWD))
     {
-#ifndef NO_DEBUG_SERIAL
-      Serial.println("failed to connect and hit timeout");
-#endif // NO_DEBUG_SERIAL
+      log_e("failed to connect and hit timeout");
       // Could be break forced after edditing, so save new config
       strcpy(wmLNBitsServer, lnbitsServerTBox.getValue()); // , sizeof(wmLNBitsServer));
       // strcpy(wmDeviceId, deviceIdTBox.getValue());//, sizeof(wmDeviceId));
@@ -288,17 +250,13 @@ void init_WifiManager()
   }
   else
   {
-#ifndef NO_DEBUG_SERIAL
-    Serial.println("Auto Conecta...");
-#endif // NO_DEBUG_SERIAL
+    log_d("Auto Conecting...");
     // Tratamos de conectar con la configuración inicial ya almacenada
     wm.setCaptivePortalEnable(true); // disable captive portal redirection
     wm.setConfigPortalBlocking(true);
     if (!wm.autoConnect(wmSSID, wmPASSWD))
     {
-#ifndef NO_DEBUG_SERIAL
-      Serial.println("Failed to connect and hit timeout...");
-#endif // NO_DEBUG_SERIAL
+      log_e("Failed to connect and hit timeout...");
     }
   }
 
@@ -306,16 +264,10 @@ void init_WifiManager()
   if (WiFi.status() == WL_CONNECTED)
   {
     // tft.pushImage(0, 0, MinerWidth, MinerHeight, MinerScreen);
-#ifndef NO_DEBUG_SERIAL
-    Serial.println("");
-    Serial.println("WiFi connected");
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-    Serial.print("MAC:");
-    Serial.println(WiFi.macAddress());
-    Serial.print("CH:");
-    Serial.println(WiFi.channel());
-#endif // NO_DEBUG_SERIAL
+    log_i("WiFi connected");
+    log_d("IP address: %s", WiFi.localIP());
+    log_v("MAC: %s", WiFi.macAddress());
+    log_v("CH: %s", WiFi.channel());
 
     // Lets deal with the user config values
     strcpy(wmLNBitsServer, lnbitsServerTBox.getValue()); // , sizeof(wmLNBitsServer));
@@ -335,9 +287,7 @@ void init_WifiManager()
   }
   else
   {
-#ifndef NO_DEBUG_SERIAL
-    Serial.println("Failed to connect reseting...");
-#endif                                                   // NO_DEBUG_SERIAL
+    log_e("Failed to connect. Reseting...");
     strcpy(wmLNBitsServer, lnbitsServerTBox.getValue()); // , sizeof(wmLNBitsServer));
     strcpy(wmLNApiKeyWS, lnApiKeyWSTBox.getValue());     //, sizeof(wmLNApiKeyWS));
 
@@ -361,9 +311,7 @@ void init_WifiManager()
 
 void reset_configurations()
 {
-#ifndef NO_DEBUG_SERIAL
-  Serial.println("Erasing Config, restarting");
-#endif // NO_DEBUG_SERIAL
+  log_w("Erasing Config, restarting");
   wm.resetSettings();
   SPIFFS.remove(JSON_CONFIG_FILE); // Borramos fichero
   ESP.restart();
@@ -382,17 +330,12 @@ void wifiManagerProcess()
   {
     if (newStatus == WL_CONNECTED)
     {
-#ifndef NO_DEBUG_SERIAL
-      Serial.println("CONNECTED - Current ip: " + WiFi.localIP().toString());
-#endif // NO_DEBUG_SERIAL
+      log_i("CONNECTED - Current ip: %s", WiFi.localIP().toString());
     }
-#ifndef NO_DEBUG_SERIAL
     else
     {
-      Serial.print("[Error] - current status: ");
-      Serial.println(newStatus);
+      log_i("current status: %d", newStatus);
     }
-#endif // NO_DEBUG_SERIAL
     oldStatus = newStatus;
   }
 }

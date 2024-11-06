@@ -16,10 +16,10 @@ lv_coord_t qrCodeSize = QRCODE_INITIAL_SIZE;
 
 #ifdef ARDUINO_ESP32_DEV
 HardwareSerial CoffeeSerial(0);
-CoffeeMachineController coffeeController(Serial);
+CoffeeMachineController coffeeController(Serial, logger);
 #else
 HardwareSerial CoffeeSerial(1);
-CoffeeMachineController coffeeController(CoffeeSerial);
+CoffeeMachineController coffeeController(CoffeeSerial, logger);
 #endif
 
 void readAndProcessMessages();
@@ -41,7 +41,7 @@ void setup()
   {
     ; // Wait for Serial Monitor to initialize
   }
-  Serial.println("ESP32 Coffee Machine Logger Starting...");
+  log_i("Connected!");
 #endif // NO_DEBUG_SERIAL
 
 #ifdef ARDUINO_ESP32_DEV
@@ -52,7 +52,7 @@ void setup()
   {
     ; // Wait for Serial Monitor to initialize
   }
-  Serial.println("UART communication with coffee machine initialized.");
+  log_i("UART communication with coffee machine initialized.");
 #endif
 
 #ifdef DISPLAY_WIDTH
@@ -75,18 +75,16 @@ void setup()
   vTaskDelay(500 / portTICK_PERIOD_MS);
 #endif // DISPLAY_WIDTH
 
-#ifndef NO_DEBUG_SERIAL
-  Serial.println("ESP32 Coffee Machine Controller Starting...");
-  Serial.println("Enter commands to control the coffee machine:");
-  Serial.println("'o' - Turn On");
-  Serial.println("'e' - Select Espresso");
-  Serial.println("'c' - Select Coffee");
-  Serial.println("'h' - Select Hot Water");
-  Serial.println("'s' - Select Steam");
-  Serial.println("'x' - Start/Stop Brewing");
-  Serial.println("'t' - Set Strength");
-  Serial.println("'q' - Set Quantity");
-#endif // DEBUG_SERIAL
+  log_i("ESP32 Coffee Machine Controller Starting...");
+  log_i("Enter commands to control the coffee machine:");
+  log_i("'o' - Turn On");
+  log_i("'e' - Select Espresso");
+  log_i("'c' - Select Coffee");
+  log_i("'h' - Select Hot Water");
+  log_i("'s' - Select Steam");
+  log_i("'x' - Start/Stop Brewing");
+  log_i("'t' - Set Strength");
+  log_i("'q' - Set Quantity");
 
   // Task to deal with the CoffeMachine Controller, CPU 0
   char *name = (char *)malloc(32);
@@ -103,9 +101,7 @@ void setup()
 
   init_WifiManager();
 
-#ifndef NO_DEBUG_SERIAL
-  Serial.println("WiFi connected.");
-#endif // DEBUG_SERIAL
+  log_i("WiFi connected.");
 
   Lightning.setOnInvoicePaid(onInvoicePaid);
   Lightning.websocketInit();
@@ -116,9 +112,7 @@ void setup()
 
 void runController(void *name)
 {
-#ifndef NO_DEBUG_SERIAL
-  Serial.println("Coffe Machine Controller started");
-#endif // DEBUG_SERIAL
+  log_i("Coffe Machine Controller started");
 
   while (true)
   {
@@ -166,7 +160,7 @@ void runController(void *name)
       }
       else
       {
-        Serial.println("Unknown command. Please enter a valid command.");
+        log_e("Unknown command. Please enter a valid command.");
       }
     }
 #endif // DEBUG_SERIAL
@@ -181,10 +175,8 @@ void runController(void *name)
 #ifdef DISPLAY_WIDTH
 void UIController(void *name)
 {
-// UI
-#ifndef NO_DEBUG_SERIAL
-  Serial.println("UI Controller started");
-#endif // DEBUG_SERIAL
+  // UI
+  log_i("UI Controller started");
 
   while (true)
   {
@@ -442,9 +434,7 @@ void onInvoicePaid(uint8_t type)
   }
   else
   {
-#ifndef NO_DEBUG_SERIAL
-    Serial.printf("Invoice paid for: %d\n", type);
-#endif // DEBUG_SERIAL
+    log_i("Invoice paid for: %d", type);
     return;
   }
 }

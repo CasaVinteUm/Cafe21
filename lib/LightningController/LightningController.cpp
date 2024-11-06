@@ -1,7 +1,6 @@
 #ifdef DISPLAY_WIDTH
 
 #include "LightningController.h"
-#include <WiFiClientSecure.h>
 
 LightningController *LightningController::instance = nullptr;
 
@@ -50,25 +49,21 @@ void LightningController::handleWebSocketEvent(WStype_t type, uint8_t *payload, 
     {
     case WStype_DISCONNECTED:
     {
-#ifndef NO_DEBUG_SERIAL
-        Serial.println("[WSc] Disconnected!");
-#endif // DEBUG_SERIAL
+        log_d("Disconnected!");
         connerr = true;
         isConnected = false;
     }
     break;
     case WStype_CONNECTED:
     {
-#ifndef NO_DEBUG_SERIAL
         if (length && payload)
         {
-            Serial.printf("[WSc] Connected to url: %s\n", payload);
+            log_d("Connected to url: %s\n", payload);
         }
         else
         {
-            Serial.printf("[WSc] Connected!\n");
+            log_d("Connected!\n");
         }
-#endif // DEBUG_SERIAL
         webSocket.sendTXT("Connected");
         connerr = false;
         isConnected = true;
@@ -85,9 +80,7 @@ void LightningController::handleWebSocketEvent(WStype_t type, uint8_t *payload, 
                 memcpy(message, payload, length);
                 message[length] = '\0';
 
-#ifndef NO_DEBUG_SERIAL
-                Serial.printf("Message: %s\n", message);
-#endif // DEBUG_SERIAL
+                log_d("Message: %s\n", message);
 
                 if (length >= 3 && isdigit(message[0]) && isdigit(message[2]))
                 {
@@ -104,34 +97,24 @@ void LightningController::handleWebSocketEvent(WStype_t type, uint8_t *payload, 
         break;
     case WStype_ERROR:
     {
-#ifndef NO_DEBUG_SERIAL
-        Serial.println("[WSc] Error received");
+        log_e("Error received");
         if (length && payload)
         {
-            Serial.printf("[WSc] Error payload (%u bytes): ", length);
-            for (size_t i = 0; i < length; i++)
-            {
-                Serial.printf("%02X ", payload[i]);
-            }
-            Serial.println();
+            char hexString[length * 5 + 1];
+            MessageLogger::hexDump(payload, length, hexString, sizeof(hexString));
+            log_e("Error payload (%u bytes): %s", length, hexString);
         }
-#endif // DEBUG_SERIAL
     }
     break;
     default:
     {
-#ifndef NO_DEBUG_SERIAL
-        Serial.printf("[WSc] Unknown type %d, length: %u\n", type, length);
+        log_d("Unknown type %d, length: %u\n", type, length);
         if (length && payload)
         {
-            Serial.printf("[WSc] Payload: ");
-            for (size_t i = 0; i < length; i++)
-            {
-                Serial.printf("%02X ", payload[i]);
-            }
-            Serial.println();
+            char hexString[length * 5 + 1];
+            MessageLogger::hexDump(payload, length, hexString, sizeof(hexString));
+            log_e("Payload (%u bytes): %s", length, hexString);
         }
-#endif // DEBUG_SERIAL
     }
     break;
     }

@@ -27,7 +27,8 @@ We use a lot of FOSS in this project, but here we have direct dependencies and s
 - [rzeldent/esp32_smartdisplay](https://github.com/rzeldent/esp32_smartdisplay)
 - [platform io](https://platformio.org)
 - [LVGL](https://lvgl.io)
-- [ESP32 Partition Calculator](https://esp32.jgarrettcorbin.com) used to make more room for the app on the esp-wroom-32 
+- [ESP32 Partition Calculator](https://esp32.jgarrettcorbin.com) used to make more room for the app on the esp-wroom-32
+- [nGoline/squarelinestudio-boards](https://github.com/nGoline/squarelinestudio-boards)
 
 The software used to make the screens and navigation is [SquareLine Studio](https://squareline.io/) which offers a free license for personal use.
 
@@ -47,4 +48,4 @@ We use LnBits' LNURLDevice extension to deal with the LNURLs and webhook connect
 
 ## Help!
 
-We need help adding translation to the SquareLine project and the messages shown on the screens.
+We need help adding translations to the SquareLine project and the messages shown on the screens.
