@@ -38,3 +38,31 @@ def successPanelButtonClickedEvent(event_struct):
 def successPanelButtonClicked(event_struct):
     return
 
+
+def configButtonBack(event_struct):
+    return
+
+
+def configButtonBackClicked(event_struct):
+    return
+
+
+def configButtonResetClicked(event_struct):
+    return
+
+
+def configButtonCoffeeClicked(event_struct):
+    return
+
+
+def configButtonEspressoClicked(event_struct):
+    return
+
+
+def homeConfigClikced(event_struct):
+    return
+
+
+def homeConfigClicked(event_struct):
+    return
+

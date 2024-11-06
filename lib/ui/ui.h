@@ -20,6 +20,7 @@ void ui_home_screen_init(void);
 extern lv_obj_t *ui_home;
 void ui_event_homeLogo( lv_event_t * e);
 extern lv_obj_t *ui_homeLogo;
+void ui_event_homeConfig( lv_event_t * e);
 extern lv_obj_t *ui_homeConfig;
 extern lv_obj_t *ui_homeContainerTitle;
 extern lv_obj_t *ui_homeTitle;
@@ -108,6 +109,28 @@ void ui_event_successPanelButton( lv_event_t * e);
 extern lv_obj_t *ui_successPanelButton;
 extern lv_obj_t *ui_successButtonLabel;
 extern lv_obj_t *ui_logoSuccess;
+// CUSTOM VARIABLES
+
+// SCREEN: ui_config
+void ui_config_screen_init(void);
+extern lv_obj_t *ui_config;
+extern lv_obj_t *ui_configPanel;
+void ui_event_configButtonEspresso( lv_event_t * e);
+extern lv_obj_t *ui_configButtonEspresso;
+extern lv_obj_t *ui_configButtonEspressoLabel;
+void ui_event_configButtonCoffee( lv_event_t * e);
+extern lv_obj_t *ui_configButtonCoffee;
+extern lv_obj_t *ui_configButtonCoffeeLabel;
+void ui_event_configButtonReset( lv_event_t * e);
+extern lv_obj_t *ui_configButtonReset;
+extern lv_obj_t *ui_configButtonResetLabel;
+void ui_event_configButtonBack( lv_event_t * e);
+extern lv_obj_t *ui_configButtonBack;
+extern lv_obj_t *ui_configButtonBackLabel;
+extern lv_obj_t *ui_configPasswordPanel;
+extern lv_obj_t *ui_configPasswordTitle;
+extern lv_obj_t *ui_configPasswordText;
+extern lv_obj_t *ui_configPasswordKeyboard;
 // CUSTOM VARIABLES
 
 // EVENTS

@@ -134,6 +134,7 @@ lv_obj_set_style_text_opa(ui_homeErrorSubTitle, 255, LV_PART_MAIN| LV_STATE_DEFA
 lv_obj_set_style_text_font(ui_homeErrorSubTitle, &ui_font_OpenSansRegular16, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_add_event_cb(ui_homeLogo, ui_event_homeLogo, LV_EVENT_ALL, NULL);
+lv_obj_add_event_cb(ui_homeConfig, ui_event_homeConfig, LV_EVENT_ALL, NULL);
 lv_obj_add_event_cb(ui_homeButton, ui_event_homeButton, LV_EVENT_ALL, NULL);
 
 }

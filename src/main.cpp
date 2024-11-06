@@ -402,6 +402,46 @@ void successPanelButtonClicked(lv_event_t *e)
   _ui_screen_change(&ui_home, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_home_screen_init);
 }
 
+void homeConfigClicked(lv_event_t *e)
+{
+  log_d("setting flag1");
+  lv_obj_add_flag(ui_configPanel, LV_OBJ_FLAG_HIDDEN);
+  log_d("setting flag2");
+  lv_obj_clear_flag(ui_configPasswordPanel, LV_OBJ_FLAG_HIDDEN);
+
+  log_d("calling screen");
+  _ui_screen_change(&ui_config, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_config_screen_init);
+}
+
+void configButtonEspressoClicked(lv_event_t *e)
+{
+  isWaitingPayment = 1;
+  coffeeController.selectCoffee(CoffeeType::ESPRESSO);
+  onInvoicePaid(1);
+}
+
+void configButtonCoffeeClicked(lv_event_t *e)
+{
+  isWaitingPayment = 2;
+  coffeeController.selectCoffee(CoffeeType::COFFEE);
+  onInvoicePaid(2);
+}
+
+void configButtonResetClicked(lv_event_t *e)
+{
+  configManager.reset();
+  wifiManager.reset();
+
+  delay(5000);
+
+  ESP.restart();
+}
+
+void configButtonBackClicked(lv_event_t *e)
+{
+  _ui_screen_change(&ui_home, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_home_screen_init);
+}
+
 void clearQrCode()
 {
   lv_timer_create([](lv_timer_t *timer)
