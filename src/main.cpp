@@ -1,34 +1,5 @@
 #include "main.h"
 
-#if CONFIG_FREERTOS_UNICORE
-static const BaseType_t app_cpu0 = 0;
-static const BaseType_t app_cpu1 = 0;
-#else
-static const BaseType_t app_cpu0 = 0;
-static const BaseType_t app_cpu1 = 1;
-#endif
-
-MessageLogger logger;
-CoffeeMachineMessage currentMessage;
-
-uint8_t delay_lvgl = 0;
-lv_coord_t qrCodeSize = QRCODE_INITIAL_SIZE;
-
-#ifdef ARDUINO_ESP32_DEV
-HardwareSerial CoffeeSerial(0);
-CoffeeMachineController coffeeController(Serial, logger);
-#else
-HardwareSerial CoffeeSerial(1);
-CoffeeMachineController coffeeController(CoffeeSerial, logger);
-#endif
-
-void readAndProcessMessages();
-void runController(void *name);
-
-#ifdef DISPLAY_WIDTH
-LightningController Lightning;
-#endif // DISPLAY_WIDTH
-
 void setup()
 {
 #if ARDUINO_USB_CDC_ON_BOOT == 1
@@ -99,7 +70,21 @@ void setup()
   delay(100);
 #endif // DISPLAY_WIDTH
 
-  init_WifiManager();
+  if (!configManager.begin())
+  {
+    log_e("Failed to initialize config manager");
+    delay(3000);
+    ESP.restart();
+  }
+
+  if (!wifiManager.begin())
+  {
+    log_e("Failed to initialize WiFi manager");
+    delay(3000);
+    ESP.restart();
+  }
+
+  initialized = true;
 
   log_i("WiFi connected.");
 
@@ -267,6 +252,10 @@ void UIController(void *name)
 
 void loop()
 {
+  if (!initialized)
+    return;
+  wifiManager.process();
+
   Lightning.websocketLoop();
   vTaskDelay(delay_lvgl + 1 / portTICK_PERIOD_MS);
 }
@@ -321,7 +310,7 @@ void showQrCode(uint8_t buttonNumber, lv_coord_t size)
 {
   // Create and update QR code
   auto ui_qrcode = lv_qrcode_create(ui_qrCodeContainer, size ? size : QRCODE_INITIAL_SIZE, lv_color_black(), lv_color_white());
-  String qrData = buttonNumber == 1 ? Lightning.button1Lnurl : Lightning.button2Lnurl;
+  String qrData = buttonNumber == 1 ? Lightning.getButton1Lnurl() : Lightning.getButton2Lnurl();
   lv_qrcode_update(ui_qrcode, qrData.c_str(), qrData.length());
   lv_obj_center(ui_qrcode);
 }

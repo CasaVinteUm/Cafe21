@@ -9,11 +9,12 @@
 #include "esp_log.h"
 
 #include "MessageLogger.h"
+#include "ConfigManager.h"
 
 class LightningController
 {
 public:
-    LightningController();
+    LightningController(ConfigManager &configManager);
 
     // Callback types
     using InvoicePaidCallback = std::function<void(uint8_t)>;
@@ -24,10 +25,11 @@ public:
 
     const bool getIsConnected() { return isConnected; };
 
-    const String button1Lnurl = "LNURL1DP68GURN8GHJ7MRWVF5HGUEWVDSHXCFJXYH8XURPVDJJ7MRWW4EXCER9WE5KXEF0V9CXJTMKXGHKCMN4WFKZ7JZ2D9FXU4MJ2A2HZNFHF3V5W32VWAPXZNTY8ACXJM3AXYNXZMT0W4H8G0FS9CCRZFNYW4EXZARFDAHR6VFXWESHY6TPVFKX202XV9K8XEFXVDHK6MT9DE6R63NPD3EK254NLZL";
-    const String button2Lnurl = "LNURL1DP68GURN8GHJ7MRWVF5HGUEWVDSHXCFJXYH8XURPVDJJ7MRWW4EXCER9WE5KXEF0V9CXJTMKXGHKCMN4WFKZ7JZ2D9FXU4MJ2A2HZNFHF3V5W32VWAPXZNTY8ACXJM3AXGNXZMT0W4H8G0FS9CCRZFNYW4EXZARFDAHR6V3XWESHY6TPVFKX202XV9K8XEFXVDHK6MT9DE6R63NPD3EK2CRQ6MQ";
+    const char *getButton1Lnurl() { return config.getButton1Lnurl(); };
+    const char *getButton2Lnurl() { return config.getButton2Lnurl(); };
 
 private:
+    ConfigManager &config;
     InvoicePaidCallback onInvoicePaid;
     WebSocketsClient webSocket;
     const uint32_t WS_RECONNECT_INTERVAL = 10000;
@@ -36,8 +38,6 @@ private:
     const uint32_t WS_HB_PONGS_MISSED = 4;
     bool connerr = true;
     bool isConnected = false;
-    const String lnbitsServer = "lnbits.casa21.space";
-    const String deviceId = "HJiRnWrWUqM7LYGELwBaMd";
     const String lnbitsWSApiURL = "/api/v1/ws/";
 
     // Make the event handler static and store instance pointer

@@ -4,7 +4,8 @@
 
 LightningController *LightningController::instance = nullptr;
 
-LightningController::LightningController()
+LightningController::LightningController(ConfigManager &configManager)
+    : config(configManager)
 {
     instance = this;
 }
@@ -17,9 +18,9 @@ void LightningController::setOnInvoicePaid(InvoicePaidCallback callback)
 void LightningController::websocketInit()
 {
 #ifdef ARDUINO_ESP32_DEV
-    webSocket.begin(lnbitsServer, 80, lnbitsWSApiURL + deviceId);
+    webSocket.begin(config.getLNBitsServer(), 80, lnbitsWSApiURL + config.getDeviceId());
 #else
-    webSocket.beginSSL(lnbitsServer, 443, lnbitsWSApiURL + deviceId);
+    webSocket.beginSSL(config.getLNBitsServer(), 443, lnbitsWSApiURL + config.getDeviceId());
 #endif // ARDUINO_ESP32_DEV
 
     webSocket.onEvent(webSocketEvent);
