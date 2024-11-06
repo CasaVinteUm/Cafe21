@@ -25,6 +25,7 @@ private:
     bool waitingForOnState;
     byte onStateCounter;
     CoffeeType selectedType = CoffeeType::NONE;
+    bool isSelectingOrder;
 
     void sendCommandMessage(CoffeeMachineCommand command);
     std::string coffeeMachineStateString(CoffeeMachineState state);

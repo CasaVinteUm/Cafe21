@@ -54,7 +54,7 @@
             "'-D GT911_I2C_CONFIG_SCL_PULLUP_EN=GPIO_PULLUP_DISABLE'",
             "'-D GT911_I2C_CONFIG_MASTER_CLK_SPEED=400000'",
             "'-D GT911_I2C_CONFIG_CLK_FLAGS=I2C_SCLK_SRC_FLAG_FOR_NOMAL'",
-            "'-D GT911_IO_I2C_CONFIG_DEV_ADDR=0x5D'",
+            "'-D GT911_IO_I2C_CONFIG_DEV_ADDR=GT911_IO_I2C_CONFIG_DEV_ADDRESS_5D'",
             "'-D GT911_IO_I2C_CONFIG_CONTROL_PHASE_BYTES=1'",
             "'-D GT911_IO_I2C_CONFIG_DC_BIT_OFFSET=0'",
             "'-D GT911_IO_I2C_CONFIG_LCD_CMD_BITS=16'",
@@ -88,13 +88,7 @@
         "f_flash": "40000000L",
         "flash_mode": "dio",
         "mcu": "esp32",
-        "variant": "esp32",
-        "hwids": [
-            [
-                "0x1A86",
-                "0x7523"
-            ]
-        ]
+        "variant": "esp32"
     },
     "connectivity": [
         "wifi",

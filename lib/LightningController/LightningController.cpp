@@ -1,6 +1,7 @@
 #ifdef DISPLAY_WIDTH
 
 #include "LightningController.h"
+#include <WiFiClientSecure.h>
 
 LightningController *LightningController::instance = nullptr;
 
@@ -16,7 +17,12 @@ void LightningController::setOnInvoicePaid(InvoicePaidCallback callback)
 
 void LightningController::websocketInit()
 {
+#ifdef ARDUINO_ESP32_DEV
+    webSocket.begin(lnbitsServer, 80, lnbitsWSApiURL + deviceId);
+#else
     webSocket.beginSSL(lnbitsServer, 443, lnbitsWSApiURL + deviceId);
+#endif // ARDUINO_ESP32_DEV
+
     webSocket.onEvent(webSocketEvent);
     webSocket.setReconnectInterval(WS_RECONNECT_INTERVAL);
     if (WS_HB_PING_TIME != 0)
@@ -35,37 +41,62 @@ void LightningController::webSocketEvent(WStype_t type, uint8_t *payload, size_t
 
 void LightningController::handleWebSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 {
+    if (length == 1 || (length == 2 && payload[0] == 0xEF))
+    {           // Filter typical corrupt patterns
+        return; // Skip processing these messages
+    }
+
     switch (type)
     {
     case WStype_DISCONNECTED:
     {
 #ifndef NO_DEBUG_SERIAL
-        Serial.print("Disconnected from url: ");
-        Serial.println((char *)payload);
+        Serial.println("[WSc] Disconnected!");
 #endif // DEBUG_SERIAL
         connerr = true;
-        // showconnect = true;
+        isConnected = false;
     }
     break;
     case WStype_CONNECTED:
     {
 #ifndef NO_DEBUG_SERIAL
-        Serial.print("Connected to url: ");
-        Serial.println((char *)payload);
+        if (length && payload)
+        {
+            Serial.printf("[WSc] Connected to url: %s\n", payload);
+        }
+        else
+        {
+            Serial.printf("[WSc] Connected!\n");
+        }
 #endif // DEBUG_SERIAL
         webSocket.sendTXT("Connected");
         connerr = false;
+        isConnected = true;
     }
     break;
     case WStype_TEXT:
     {
+        if (length && payload)
+        {
+            // Make sure we have a null-terminated string
+            char *message = (char *)malloc(length + 1);
+            if (message)
+            {
+                memcpy(message, payload, length);
+                message[length] = '\0';
+
 #ifndef NO_DEBUG_SERIAL
-        Serial.print("Message: ");
-        Serial.println((char *)payload);
+                Serial.printf("Message: %s\n", message);
 #endif // DEBUG_SERIAL
 
-        if (isdigit(payload[0]) && isdigit(payload[2]))
-            onInvoicePaid(String((char)payload[0]).toInt());
+                if (length >= 3 && isdigit(message[0]) && isdigit(message[2]))
+                {
+                    onInvoicePaid(message[0] - '0'); // Convert char to int directly
+                }
+
+                free(message);
+            }
+        }
     }
     break;
     case WStype_PING:
@@ -73,17 +104,33 @@ void LightningController::handleWebSocketEvent(WStype_t type, uint8_t *payload, 
         break;
     case WStype_ERROR:
     {
-        // answer to a ping we send
 #ifndef NO_DEBUG_SERIAL
-        Serial.println("Error received");
+        Serial.println("[WSc] Error received");
+        if (length && payload)
+        {
+            Serial.printf("[WSc] Error payload (%u bytes): ", length);
+            for (size_t i = 0; i < length; i++)
+            {
+                Serial.printf("%02X ", payload[i]);
+            }
+            Serial.println();
+        }
 #endif // DEBUG_SERIAL
     }
     break;
     default:
     {
 #ifndef NO_DEBUG_SERIAL
-        Serial.print("Unknown: ");
-        Serial.println((char *)payload);
+        Serial.printf("[WSc] Unknown type %d, length: %u\n", type, length);
+        if (length && payload)
+        {
+            Serial.printf("[WSc] Payload: ");
+            for (size_t i = 0; i < length; i++)
+            {
+                Serial.printf("%02X ", payload[i]);
+            }
+            Serial.println();
+        }
 #endif // DEBUG_SERIAL
     }
     break;

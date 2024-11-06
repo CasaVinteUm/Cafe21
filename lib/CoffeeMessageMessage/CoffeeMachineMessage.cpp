@@ -117,7 +117,7 @@ CoffeeMachineMessage::CoffeeMachineMessage(const uint8_t *message, size_t length
     // Byte 16: Play button status
     play = (message[16] == 0x07);
 
-    if (message[3] == 0x03 || message[4] == 0x03 || message[5] == 0x03 || message[6] == 0x03)
+    if ((message[3] == 0x03 || message[4] == 0x03 || message[5] == 0x03 || message[6] == 0x03) && (message[3] == 0x07 || message[4] == 0x07 || message[5] == 0x07 || message[6] == 0x07))
     {
         loading = true;
     }

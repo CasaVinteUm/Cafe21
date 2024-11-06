@@ -11,7 +11,7 @@ class CoffeeMachineStateMachine
 public:
     CoffeeMachineStateMachine();
 
-    void updateState(const CoffeeMachineMessage &message);
+    bool updateState(const CoffeeMachineMessage &message);
     bool canSendCommand(CoffeeMachineCommand command) const;
     CoffeeMachineState getCurrentState() const;
     CoffeeOptions getCurrentOptions() const;

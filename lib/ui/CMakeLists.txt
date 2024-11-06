@@ -1,6 +1,4 @@
-SET(SOURCES components/ui_comp_goback.c
-    components/ui_comp.c
-    screens/ui_home.c
+SET(SOURCES screens/ui_home.c
     screens/ui_choose.c
     screens/ui_payment.c
     screens/ui_preparing.c
@@ -9,34 +7,23 @@ SET(SOURCES components/ui_comp_goback.c
     components/ui_comp_hook.c
     ui_helpers.c
     images/ui_img_logo21_png.c
-    images/ui_img_configsmall_png.c
-    images/ui_img_watersmall_png.c
-    images/ui_img_expressolarge_png.c
-    images/ui_img_coffelarge_png.c
-    images/ui_img_chevronsmall_png.c
-    images/ui_img_exitsmall_png.c
-    images/ui_img_checklarge_png.c
-    images/ui_img_419703364.c
-    images/ui_img_qr_code_png.c
-    images/ui_img_hoselarge_png.c
-    images/ui_img_minussmall_png.c
-    images/ui_img_plussmall_png.c
-    images/ui_img_showerlarge_png.c
-    images/ui_img_toogleoff_png.c
-    images/ui_img_toogleon_png.c
-    images/ui_img_trashsmall_png.c
-    images/ui_img_warnsmall_png.c
-    images/ui_img_xlarge_png.c
-    fonts/ui_font_LoraRegula24.c
-    fonts/ui_font_LoraRegula40.c
-    fonts/ui_font_LoraRegula64.c
+    images/ui_img_config_png.c
+    images/ui_img_water_png.c
+    images/ui_img_espresso_png.c
+    images/ui_img_coffee_png.c
+    images/ui_img_chevron_png.c
+    images/ui_img_check_png.c
+    images/ui_img_exit_png.c
+    images/ui_img_trash_png.c
+    images/ui_img_warning_png.c
+    images/ui_img_wifi_png.c
+    fonts/ui_font_LoraRegular24.c
+    fonts/ui_font_LoraRegular40.c
+    fonts/ui_font_LoraRegular64.c
     fonts/ui_font_OpenSansBold14.c
     fonts/ui_font_OpenSansBold20.c
-    fonts/ui_font_OpenSansRegular14.c
     fonts/ui_font_OpenSansRegular16.c
     fonts/ui_font_OpenSansRegular20.c
-    fonts/ui_font_OpenSansSemiBold14.c
-    fonts/ui_font_OpenSansSemiBold16.c
-    fonts/ui_font_OpenSansSemiBold20.c)
+    fonts/ui_font_OpenSansSemiBold16.c)
 
 add_library(ui ${SOURCES})
