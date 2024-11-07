@@ -115,11 +115,17 @@ lv_obj_t *ui_configButtonResetLabel;
 void ui_event_configButtonBack( lv_event_t * e);
 lv_obj_t *ui_configButtonBack;
 lv_obj_t *ui_configButtonBackLabel;
+void ui_event_configButtonRestart( lv_event_t * e);
+lv_obj_t *ui_configButtonRestart;
+lv_obj_t *ui_configButtonBackLabel1;
 lv_obj_t *ui_configPasswordPanel;
 lv_obj_t *ui_configPasswordLabel;
 lv_obj_t *ui_configPasswordText;
 void ui_event_configPasswordKeyboard( lv_event_t * e);
 lv_obj_t *ui_configPasswordKeyboard;
+lv_obj_t *ui_configLogo;
+void ui_event_configBackButton( lv_event_t * e);
+lv_obj_t *ui_configBackButton;
 // CUSTOM VARIABLES
 
 // EVENTS
@@ -271,11 +277,27 @@ if ( event_code == LV_EVENT_CLICKED) {
 }
 }
 
+void ui_event_configButtonRestart( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+if ( event_code == LV_EVENT_CLICKED) {
+      configButtonRestartClicked( e );
+}
+}
+
 void ui_event_configPasswordKeyboard( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);
 
 if ( event_code == LV_EVENT_VALUE_CHANGED) {
       configPasswordKeyboardValueChanged( e );
+}
+}
+
+void ui_event_configBackButton( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+if ( event_code == LV_EVENT_CLICKED) {
+      _ui_screen_change( &ui_home, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_home_screen_init);
 }
 }
 

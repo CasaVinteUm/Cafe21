@@ -5,6 +5,52 @@ CoffeeMachineController::CoffeeMachineController(HardwareSerial &serial, Message
 {
 }
 
+void CoffeeMachineController::loop()
+{
+    static uint8_t messageBuffer[19];
+    static size_t messageIndex = 0;
+
+    while (serialPort.available())
+    {
+        uint8_t incomingByte = serialPort.read();
+        // Assemble the message as before
+        if (messageIndex == 0 && incomingByte != 0xD5)
+        {
+            continue;
+        }
+
+        // If we get a init header anywhere else, reset the buffer and fill up the message again
+        if (messageIndex != 0 && incomingByte == 0xD5)
+        {
+            messageIndex = 0;
+        }
+
+        messageBuffer[messageIndex++] = incomingByte;
+
+        // Check for header completion
+        if (messageIndex == 2)
+        {
+            if (messageBuffer[1] != 0x55)
+            {
+                messageIndex = 0;
+                continue;
+            }
+        }
+
+        // Assuming fixed message length of 19 bytes
+        if (messageIndex >= 19)
+        {
+            logger.logMessage(Sender::CoffeeMachine, messageBuffer, 19);
+
+            CoffeeMachineMessage message(messageBuffer, 19);
+            // currentMessage = message;
+            updateState(message);
+
+            messageIndex = 0;
+        }
+    }
+}
+
 void CoffeeMachineController::updateState(const CoffeeMachineMessage &message)
 {
     if (stateMachine.updateState(message))

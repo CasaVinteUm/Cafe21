@@ -17,6 +17,7 @@ public:
     bool canSendCommand(CoffeeMachineCommand command) const;
     CoffeeMachineState getCurrentState() const;
     CoffeeOptions getCurrentOptions() const;
+    CoffeeMachineError GetCurrentError() const;
 
 private:
     CoffeeMachineState currentState;

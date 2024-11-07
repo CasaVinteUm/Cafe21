@@ -126,6 +126,9 @@ lv_obj_t *ui_configButtonResetLabel;
 void ui_event_configButtonBack( lv_event_t * e);
 lv_obj_t *ui_configButtonBack;
 lv_obj_t *ui_configButtonBackLabel;
+void ui_event_configButtonRestart( lv_event_t * e);
+lv_obj_t *ui_configButtonRestart;
+lv_obj_t *ui_configButtonResetLabel1;
 lv_obj_t *ui_configPasswordPanel;
 lv_obj_t *ui_configPasswordLabel;
 lv_obj_t *ui_configPasswordText;
@@ -334,6 +337,14 @@ void ui_event_configButtonBack( lv_event_t * e) {
 
 if ( event_code == LV_EVENT_CLICKED) {
       configButtonBackClicked( e );
+}
+}
+
+void ui_event_configButtonRestart( lv_event_t * e) {
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+if ( event_code == LV_EVENT_CLICKED) {
+      configButtonRestartClicked( e );
 }
 }
 

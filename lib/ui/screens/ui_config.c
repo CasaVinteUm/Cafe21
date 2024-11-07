@@ -18,7 +18,6 @@ lv_obj_set_height( ui_configPanel, 350);
 lv_obj_set_x( ui_configPanel, 0 );
 lv_obj_set_y( ui_configPanel, 26 );
 lv_obj_set_align( ui_configPanel, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_configPanel, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_clear_flag( ui_configPanel, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_radius(ui_configPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_configPanel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -27,8 +26,10 @@ lv_obj_set_style_border_color(ui_configPanel, lv_color_hex(0x4D4D4D), LV_PART_MA
 lv_obj_set_style_border_opa(ui_configPanel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_configButtonEspresso = lv_btn_create(ui_configPanel);
-lv_obj_set_width( ui_configButtonEspresso, 328);
+lv_obj_set_width( ui_configButtonEspresso, 280);
 lv_obj_set_height( ui_configButtonEspresso, 44);
+lv_obj_set_x( ui_configButtonEspresso, -167 );
+lv_obj_set_y( ui_configButtonEspresso, 3 );
 lv_obj_set_align( ui_configButtonEspresso, LV_ALIGN_TOP_MID );
 lv_obj_add_flag( ui_configButtonEspresso, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_clear_flag( ui_configButtonEspresso, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
@@ -50,10 +51,10 @@ lv_obj_set_style_text_opa(ui_configButtonEspressoLabel, 255, LV_PART_MAIN| LV_ST
 lv_obj_set_style_text_font(ui_configButtonEspressoLabel, &ui_font_OpenSansBold20, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_configButtonCoffee = lv_btn_create(ui_configPanel);
-lv_obj_set_width( ui_configButtonCoffee, 328);
+lv_obj_set_width( ui_configButtonCoffee, 280);
 lv_obj_set_height( ui_configButtonCoffee, 44);
-lv_obj_set_x( ui_configButtonCoffee, 0 );
-lv_obj_set_y( ui_configButtonCoffee, 75 );
+lv_obj_set_x( ui_configButtonCoffee, 163 );
+lv_obj_set_y( ui_configButtonCoffee, 4 );
 lv_obj_set_align( ui_configButtonCoffee, LV_ALIGN_TOP_MID );
 lv_obj_add_flag( ui_configButtonCoffee, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_clear_flag( ui_configButtonCoffee, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
@@ -75,15 +76,15 @@ lv_obj_set_style_text_opa(ui_configButtonCoffeeLabel, 255, LV_PART_MAIN| LV_STAT
 lv_obj_set_style_text_font(ui_configButtonCoffeeLabel, &ui_font_OpenSansBold20, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_configButtonReset = lv_btn_create(ui_configPanel);
-lv_obj_set_width( ui_configButtonReset, 328);
+lv_obj_set_width( ui_configButtonReset, 232);
 lv_obj_set_height( ui_configButtonReset, 44);
 lv_obj_set_x( ui_configButtonReset, 0 );
-lv_obj_set_y( ui_configButtonReset, 150 );
+lv_obj_set_y( ui_configButtonReset, 169 );
 lv_obj_set_align( ui_configButtonReset, LV_ALIGN_TOP_MID );
 lv_obj_add_flag( ui_configButtonReset, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_clear_flag( ui_configButtonReset, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_radius(ui_configButtonReset, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_configButtonReset, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_color(ui_configButtonReset, lv_color_hex(0xDB3E3E), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_configButtonReset, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_color(ui_configButtonReset, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_configButtonReset, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -95,7 +96,7 @@ lv_obj_set_width( ui_configButtonResetLabel, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_configButtonResetLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_configButtonResetLabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_configButtonResetLabel,"Resetar Configurações");
-lv_obj_set_style_text_color(ui_configButtonResetLabel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_color(ui_configButtonResetLabel, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_configButtonResetLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_configButtonResetLabel, &ui_font_OpenSansBold20, LV_PART_MAIN| LV_STATE_DEFAULT);
 
@@ -124,12 +125,38 @@ lv_obj_set_style_text_color(ui_configButtonBackLabel, lv_color_hex(0x000000), LV
 lv_obj_set_style_text_opa(ui_configButtonBackLabel, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_configButtonBackLabel, &ui_font_OpenSansBold20, LV_PART_MAIN| LV_STATE_DEFAULT);
 
+ui_configButtonRestart = lv_btn_create(ui_configPanel);
+lv_obj_set_width( ui_configButtonRestart, 280);
+lv_obj_set_height( ui_configButtonRestart, 44);
+lv_obj_set_x( ui_configButtonRestart, 1 );
+lv_obj_set_y( ui_configButtonRestart, 86 );
+lv_obj_set_align( ui_configButtonRestart, LV_ALIGN_TOP_MID );
+lv_obj_add_flag( ui_configButtonRestart, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_clear_flag( ui_configButtonRestart, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_radius(ui_configButtonRestart, 4, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_bg_color(ui_configButtonRestart, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_configButtonRestart, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_color(ui_configButtonRestart, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_configButtonRestart, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_align(ui_configButtonRestart, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_configButtonRestart, &ui_font_OpenSansBold14, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_configButtonResetLabel1 = lv_label_create(ui_configButtonRestart);
+lv_obj_set_width( ui_configButtonResetLabel1, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_configButtonResetLabel1, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_configButtonResetLabel1, LV_ALIGN_CENTER );
+lv_label_set_text(ui_configButtonResetLabel1,"Reiniciar App");
+lv_obj_set_style_text_color(ui_configButtonResetLabel1, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_configButtonResetLabel1, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_configButtonResetLabel1, &ui_font_OpenSansBold20, LV_PART_MAIN| LV_STATE_DEFAULT);
+
 ui_configPasswordPanel = lv_obj_create(ui_config);
 lv_obj_set_width( ui_configPasswordPanel, 700);
 lv_obj_set_height( ui_configPasswordPanel, 350);
 lv_obj_set_x( ui_configPasswordPanel, 0 );
 lv_obj_set_y( ui_configPasswordPanel, 26 );
 lv_obj_set_align( ui_configPasswordPanel, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_configPasswordPanel, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_clear_flag( ui_configPasswordPanel, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_radius(ui_configPasswordPanel, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_bg_color(ui_configPasswordPanel, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -195,6 +222,7 @@ lv_obj_add_event_cb(ui_configButtonEspresso, ui_event_configButtonEspresso, LV_E
 lv_obj_add_event_cb(ui_configButtonCoffee, ui_event_configButtonCoffee, LV_EVENT_ALL, NULL);
 lv_obj_add_event_cb(ui_configButtonReset, ui_event_configButtonReset, LV_EVENT_ALL, NULL);
 lv_obj_add_event_cb(ui_configButtonBack, ui_event_configButtonBack, LV_EVENT_ALL, NULL);
+lv_obj_add_event_cb(ui_configButtonRestart, ui_event_configButtonRestart, LV_EVENT_ALL, NULL);
 lv_keyboard_set_textarea(ui_configPasswordKeyboard,ui_configPasswordText);
 lv_obj_add_event_cb(ui_configPasswordKeyboard, ui_event_configPasswordKeyboard, LV_EVENT_ALL, NULL);
 lv_obj_add_event_cb(ui_configBack, ui_event_configBack, LV_EVENT_ALL, NULL);

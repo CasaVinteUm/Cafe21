@@ -51,18 +51,22 @@ bool ConfigManager::load()
     if (nvs_get_str(nvsHandle, "lnbits_server", nullptr, &required_size) == ESP_OK)
     {
         nvs_get_str(nvsHandle, "lnbits_server", lnbitsServer, &required_size);
+        log_i("lnbits_server: %s", lnbitsServer);
     }
     if (nvs_get_str(nvsHandle, "device_id", nullptr, &required_size) == ESP_OK)
     {
         nvs_get_str(nvsHandle, "device_id", deviceId, &required_size);
+        log_i("device_id: %s", deviceId);
     }
     if (nvs_get_str(nvsHandle, "button1_lnurl", nullptr, &required_size) == ESP_OK)
     {
         nvs_get_str(nvsHandle, "button1_lnurl", button1Lnurl, &required_size);
+        log_i("button1_lnurl: %s", button1Lnurl);
     }
     if (nvs_get_str(nvsHandle, "button2_lnurl", nullptr, &required_size) == ESP_OK)
     {
         nvs_get_str(nvsHandle, "button2_lnurl", button2Lnurl, &required_size);
+        log_i("button2_lnurl: %s", button2Lnurl);
     }
 
     log_i("Configuration loaded");

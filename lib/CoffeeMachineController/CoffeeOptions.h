@@ -30,4 +30,12 @@ struct CoffeeOptions
     SizeLevel size = SizeLevel::MEDIUM;
 };
 
+enum class CoffeeMachineError
+{
+    NONE = 0,
+    GENERAL = 1,
+    NOWATER = 2,
+    TRASH = 3
+};
+
 #endif // COFFEEOPTIONS_H

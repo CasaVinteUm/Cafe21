@@ -116,11 +116,17 @@ extern lv_obj_t *ui_configButtonResetLabel;
 void ui_event_configButtonBack( lv_event_t * e);
 extern lv_obj_t *ui_configButtonBack;
 extern lv_obj_t *ui_configButtonBackLabel;
+void ui_event_configButtonRestart( lv_event_t * e);
+extern lv_obj_t *ui_configButtonRestart;
+extern lv_obj_t *ui_configButtonBackLabel1;
 extern lv_obj_t *ui_configPasswordPanel;
 extern lv_obj_t *ui_configPasswordLabel;
 extern lv_obj_t *ui_configPasswordText;
 void ui_event_configPasswordKeyboard( lv_event_t * e);
 extern lv_obj_t *ui_configPasswordKeyboard;
+extern lv_obj_t *ui_configLogo;
+void ui_event_configBackButton( lv_event_t * e);
+extern lv_obj_t *ui_configBackButton;
 // CUSTOM VARIABLES
 
 // EVENTS

@@ -103,6 +103,26 @@ bool CoffeeMachineStateMachine::updateState(const CoffeeMachineMessage &message)
     return true;
 }
 
+CoffeeMachineError CoffeeMachineStateMachine::GetCurrentError() const
+{
+    if (currentMessage.generalWarning)
+    {
+        return CoffeeMachineError::GENERAL;
+    }
+
+    if (currentMessage.noWater)
+    {
+        return CoffeeMachineError::NOWATER;
+    }
+
+    if (currentMessage.cleanTrash)
+    {
+        return CoffeeMachineError::TRASH;
+    }
+
+    return CoffeeMachineError::NONE;
+}
+
 bool CoffeeMachineStateMachine::canSendCommand(CoffeeMachineCommand command) const
 {
     if (command == CoffeeMachineCommand::On)
