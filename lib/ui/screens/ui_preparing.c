@@ -110,6 +110,5 @@ lv_obj_clear_flag( ui_preparingLogo2, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
 lv_obj_add_event_cb(ui_preparingButton, ui_event_preparingButton, LV_EVENT_ALL, NULL);
 lv_obj_add_event_cb(ui_preparingLogo2, ui_event_preparingLogo2, LV_EVENT_ALL, NULL);
-lv_obj_add_event_cb(ui_preparing, ui_event_preparing, LV_EVENT_ALL, NULL);
 
 }

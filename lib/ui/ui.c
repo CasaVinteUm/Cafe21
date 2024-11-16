@@ -31,9 +31,7 @@ lv_obj_t *ui_homeConfig;
 
 // SCREEN: ui_choose
 void ui_choose_screen_init(void);
-void ui_event_choose( lv_event_t * e);
 lv_obj_t *ui_choose;
-void ui_event_choosePanel1( lv_event_t * e);
 lv_obj_t *ui_choosePanel1;
 void ui_event_choosePanel1Button( lv_event_t * e);
 lv_obj_t *ui_choosePanel1Button;
@@ -45,7 +43,6 @@ lv_obj_t *ui_choosePanel1PriceContainerTop;
 lv_obj_t *ui_choosePanel1PriceSats;
 lv_obj_t *ui_choosePanel1PriceBrl;
 lv_obj_t *ui_choosePanel1PriceContainerBottom;
-void ui_event_choosePanel2( lv_event_t * e);
 lv_obj_t *ui_choosePanel2;
 void ui_event_choosePanel2Button( lv_event_t * e);
 lv_obj_t *ui_choosePanel2Button;
@@ -66,7 +63,6 @@ lv_obj_t *ui_chooseLogo;
 
 // SCREEN: ui_payment
 void ui_payment_screen_init(void);
-void ui_event_payment( lv_event_t * e);
 lv_obj_t *ui_payment;
 void ui_event_paymentBack( lv_event_t * e);
 lv_obj_t *ui_paymentBack;
@@ -81,7 +77,6 @@ lv_obj_t *ui_paymentLogo;
 
 // SCREEN: ui_preparing
 void ui_preparing_screen_init(void);
-void ui_event_preparing( lv_event_t * e);
 lv_obj_t *ui_preparing;
 lv_obj_t *ui_preparingPanel;
 void ui_event_preparingButton( lv_event_t * e);
@@ -98,7 +93,6 @@ lv_obj_t *ui_preparingLogo2;
 
 // SCREEN: ui_success
 void ui_success_screen_init(void);
-void ui_event_success( lv_event_t * e);
 lv_obj_t *ui_success;
 lv_obj_t *ui_successPanel;
 lv_obj_t *ui_successPanelImage;
@@ -181,36 +175,11 @@ if ( event_code == LV_EVENT_CLICKED) {
 }
 }
 
-void ui_event_choose( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT  ) {
-lv_indev_wait_release(lv_indev_get_act());
-      _ui_screen_change( &ui_home, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_home_screen_init);
-}
-}
-
-void ui_event_choosePanel1( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_screen_change( &ui_payment, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_payment_screen_init);
-}
-}
-
 void ui_event_choosePanel1Button( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);
 
 if ( event_code == LV_EVENT_CLICKED) {
       chooseButton1Clicked( e );
-}
-}
-
-void ui_event_choosePanel2( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_screen_change( &ui_payment, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_payment_screen_init);
 }
 }
 
@@ -238,15 +207,6 @@ if ( event_code == LV_EVENT_CLICKED) {
 }
 }
 
-void ui_event_payment( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT  ) {
-lv_indev_wait_release(lv_indev_get_act());
-      _ui_screen_change( &ui_home, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_home_screen_init);
-}
-}
-
 void ui_event_paymentBack( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);
 
@@ -263,18 +223,6 @@ if ( event_code == LV_EVENT_CLICKED) {
 }
 }
 
-void ui_event_preparing( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT  ) {
-lv_indev_wait_release(lv_indev_get_act());
-      _ui_screen_change( &ui_home, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_home_screen_init);
-}
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_screen_change( &ui_success, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_success_screen_init);
-}
-}
-
 void ui_event_preparingButton( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);
 
@@ -288,15 +236,6 @@ void ui_event_preparingLogo2( lv_event_t * e) {
 
 if ( event_code == LV_EVENT_CLICKED) {
       _ui_screen_change( &ui_choose, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_choose_screen_init);
-}
-}
-
-void ui_event_success( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT  ) {
-lv_indev_wait_release(lv_indev_get_act());
-      _ui_screen_change( &ui_home, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_home_screen_init);
 }
 }
 

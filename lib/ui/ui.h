@@ -36,9 +36,7 @@ extern lv_obj_t *ui_homeConfig;
 
 // SCREEN: ui_choose
 void ui_choose_screen_init(void);
-void ui_event_choose( lv_event_t * e);
 extern lv_obj_t *ui_choose;
-void ui_event_choosePanel1( lv_event_t * e);
 extern lv_obj_t *ui_choosePanel1;
 void ui_event_choosePanel1Button( lv_event_t * e);
 extern lv_obj_t *ui_choosePanel1Button;
@@ -50,7 +48,6 @@ extern lv_obj_t *ui_choosePanel1PriceContainerTop;
 extern lv_obj_t *ui_choosePanel1PriceSats;
 extern lv_obj_t *ui_choosePanel1PriceBrl;
 extern lv_obj_t *ui_choosePanel1PriceContainerBottom;
-void ui_event_choosePanel2( lv_event_t * e);
 extern lv_obj_t *ui_choosePanel2;
 void ui_event_choosePanel2Button( lv_event_t * e);
 extern lv_obj_t *ui_choosePanel2Button;
@@ -70,7 +67,6 @@ extern lv_obj_t *ui_chooseLogo;
 
 // SCREEN: ui_payment
 void ui_payment_screen_init(void);
-void ui_event_payment( lv_event_t * e);
 extern lv_obj_t *ui_payment;
 void ui_event_paymentBack( lv_event_t * e);
 extern lv_obj_t *ui_paymentBack;
@@ -84,7 +80,6 @@ extern lv_obj_t *ui_paymentLogo;
 
 // SCREEN: ui_preparing
 void ui_preparing_screen_init(void);
-void ui_event_preparing( lv_event_t * e);
 extern lv_obj_t *ui_preparing;
 extern lv_obj_t *ui_preparingPanel;
 void ui_event_preparingButton( lv_event_t * e);
@@ -100,7 +95,6 @@ extern lv_obj_t *ui_preparingLogo2;
 
 // SCREEN: ui_success
 void ui_success_screen_init(void);
-void ui_event_success( lv_event_t * e);
 extern lv_obj_t *ui_success;
 extern lv_obj_t *ui_successPanel;
 extern lv_obj_t *ui_successPanelImage;

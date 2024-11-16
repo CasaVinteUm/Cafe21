@@ -104,6 +104,7 @@ lv_obj_set_height( ui_choosePanel1PriceSats, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_x( ui_choosePanel1PriceSats, 0 );
 lv_obj_set_y( ui_choosePanel1PriceSats, 246 );
 lv_label_set_text(ui_choosePanel1PriceSats,"1.414 sats");
+lv_obj_add_flag( ui_choosePanel1PriceSats, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_set_style_text_color(ui_choosePanel1PriceSats, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_choosePanel1PriceSats, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_choosePanel1PriceSats, &ui_font_OpenSansBold20, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -228,6 +229,7 @@ lv_obj_set_height( ui_choosePanel2PriceSats, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_x( ui_choosePanel2PriceSats, 0 );
 lv_obj_set_y( ui_choosePanel2PriceSats, 246 );
 lv_label_set_text(ui_choosePanel2PriceSats,"1.414 sats");
+lv_obj_add_flag( ui_choosePanel2PriceSats, LV_OBJ_FLAG_HIDDEN );   /// Flags
 lv_obj_set_style_text_color(ui_choosePanel2PriceSats, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_choosePanel2PriceSats, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_font(ui_choosePanel2PriceSats, &ui_font_OpenSansBold20, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -277,11 +279,8 @@ lv_obj_add_flag( ui_chooseLogo, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
 lv_obj_clear_flag( ui_chooseLogo, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
 lv_obj_add_event_cb(ui_choosePanel1Button, ui_event_choosePanel1Button, LV_EVENT_ALL, NULL);
-lv_obj_add_event_cb(ui_choosePanel1, ui_event_choosePanel1, LV_EVENT_ALL, NULL);
 lv_obj_add_event_cb(ui_choosePanel2Button, ui_event_choosePanel2Button, LV_EVENT_ALL, NULL);
-lv_obj_add_event_cb(ui_choosePanel2, ui_event_choosePanel2, LV_EVENT_ALL, NULL);
 lv_obj_add_event_cb(ui_chooseBack, ui_event_chooseBack, LV_EVENT_ALL, NULL);
 lv_obj_add_event_cb(ui_chooseLogo, ui_event_chooseLogo, LV_EVENT_ALL, NULL);
-lv_obj_add_event_cb(ui_choose, ui_event_choose, LV_EVENT_ALL, NULL);
 
 }

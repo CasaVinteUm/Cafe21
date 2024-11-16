@@ -84,6 +84,5 @@ lv_obj_add_flag( ui_logoSuccess, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
 lv_obj_clear_flag( ui_logoSuccess, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
 lv_obj_add_event_cb(ui_successPanelButton, ui_event_successPanelButton, LV_EVENT_ALL, NULL);
-lv_obj_add_event_cb(ui_success, ui_event_success, LV_EVENT_ALL, NULL);
 
 }

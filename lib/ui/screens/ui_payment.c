@@ -84,6 +84,5 @@ lv_obj_set_style_border_width(ui_paymentLogo, 10, LV_PART_MAIN| LV_STATE_DEFAULT
 
 lv_obj_add_event_cb(ui_paymentBack, ui_event_paymentBack, LV_EVENT_ALL, NULL);
 lv_obj_add_event_cb(ui_paymentLogo, ui_event_paymentLogo, LV_EVENT_ALL, NULL);
-lv_obj_add_event_cb(ui_payment, ui_event_payment, LV_EVENT_ALL, NULL);
 
 }
