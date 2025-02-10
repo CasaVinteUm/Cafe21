@@ -33,13 +33,13 @@ void WiFiManagerWrapper::setupParameters()
     button1LnurlParam = new WiFiManagerParameter(
         "button1_lnurl",
         "Button 1 LNURL",
-        config.getDeviceId(),
+        config.getButton1Lnurl(),
         256);
 
     button2LnurlParam = new WiFiManagerParameter(
         "button2_lnurl",
         "Button 2 LNURL",
-        config.getDeviceId(),
+        config.getButton2Lnurl(),
         256);
 
     // Add parameters to WiFiManager
