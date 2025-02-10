@@ -36,6 +36,8 @@ void setup()
   log_i("'q' - Set Quantity");
 #endif
 
+  uiController.begin();
+
   if (!configManager.begin())
   {
     log_e("Failed to initialize config manager");
@@ -57,13 +59,13 @@ void setup()
   lightningController.websocketInit();
 
   coffeeTask.begin();
-  uiController.begin();
 }
 
 void loop()
 {
   if (!initialized)
     return;
+
   wifiManager.process();
 
   lightningController.websocketLoop();
