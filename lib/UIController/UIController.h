@@ -19,6 +19,7 @@ public:
     void clearQrCode();
     void setWaitingPaymentFor(uint8_t type);
     uint8_t getDelayLvgl() const { return delayLvgl; };
+    void setIsInitialized(bool isInitialized) { UIController::isInitialized = isInitialized; }
 
     static void task(void *pvParameters);
 
@@ -30,6 +31,7 @@ private:
     uint8_t timerButtonNumber;
     uint8_t waitingPaymentFor = 0;
     uint8_t delayLvgl = 0;
+    bool isInitialized = false;
 
     static void qrCodeTimerCallback(lv_timer_t *timer);
 

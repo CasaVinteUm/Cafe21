@@ -53,6 +53,7 @@ void setup()
   }
 
   initialized = true;
+  uiController.setIsInitialized(true);
 
   log_i("WiFi connected.");
 
