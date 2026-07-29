@@ -2,22 +2,22 @@
 
 const char *ConfigManager::NVS_NAMESPACE = "cafe21";
 
-void ConfigManager::setDefaultValues()
-{
-    // Set defaults
-    strcpy(lnbitsServer, "lnbits.casa21.space");
-    strcpy(deviceId, "HJiRnWrWUqM7LYGELwBaMd");
-    strcpy(button1Lnurl, "LNURL1DP68GURN8GHJ7MRWVF5HGUEWVDSHXCFJXYH8XURPVDJJ7MRWW4EXCER9WE5KXEF0V9CXJTMKXGHKCMN4WFKZ7JZ2D9FXU4MJ2A2HZNFHF3V5W32VWAPXZNTY8ACXJM3AXYNXZMT0W4H8G0FS9CCRZFNYW4EXZARFDAHR6VFXWESHY6TPVFKX202XV9K8XEFXVDHK6MT9DE6R63NPD3EK254NLZL");
-    strcpy(button2Lnurl, "LNURL1DP68GURN8GHJ7MRWVF5HGUEWVDSHXCFJXYH8XURPVDJJ7MRWW4EXCER9WE5KXEF0V9CXJTMKXGHKCMN4WFKZ7JZ2D9FXU4MJ2A2HZNFHF3V5W32VWAPXZNTY8ACXJM3AXGNXZMT0W4H8G0FS9CCRZFNYW4EXZARFDAHR6V3XWESHY6TPVFKX202XV9K8XEFXVDHK6MT9DE6R63NPD3EK2CRQ6MQ");
-}
-
-ConfigManager::ConfigManager() : initialized(false)
+ConfigManager::ConfigManager()
+    : paymentGateway(nullptr), initialized(false)
 {
     setDefaultValues();
 }
 
-bool ConfigManager::begin()
+void ConfigManager::setDefaultValues()
 {
+    espressoPriceSats = 0;
+    coffeePriceSats = 0;
+}
+
+bool ConfigManager::begin(IPaymentGateway *gateway)
+{
+    paymentGateway = gateway;
+
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {
@@ -34,172 +34,153 @@ bool ConfigManager::begin()
     }
 
     initialized = true;
-    log_i("NVS initialized successfully");
     return load();
 }
 
 bool ConfigManager::load()
 {
     if (!initialized)
+    {
         return false;
-
-    // Load all values from NVS
-    size_t required_size;
-    esp_err_t err;
-
-    // Load strings
-    if (nvs_get_str(nvsHandle, "lnbits_server", nullptr, &required_size) == ESP_OK)
-    {
-        nvs_get_str(nvsHandle, "lnbits_server", lnbitsServer, &required_size);
-        log_i("lnbits_server: %s", lnbitsServer);
-    }
-    if (nvs_get_str(nvsHandle, "device_id", nullptr, &required_size) == ESP_OK)
-    {
-        nvs_get_str(nvsHandle, "device_id", deviceId, &required_size);
-        log_i("device_id: %s", deviceId);
-    }
-    if (nvs_get_str(nvsHandle, "button1_lnurl", nullptr, &required_size) == ESP_OK)
-    {
-        nvs_get_str(nvsHandle, "button1_lnurl", button1Lnurl, &required_size);
-        log_i("button1_lnurl: %s", button1Lnurl);
-    }
-    if (nvs_get_str(nvsHandle, "button2_lnurl", nullptr, &required_size) == ESP_OK)
-    {
-        nvs_get_str(nvsHandle, "button2_lnurl", button2Lnurl, &required_size);
-        log_i("button2_lnurl: %s", button2Lnurl);
     }
 
-    log_i("Configuration loaded");
-    return true;
+    nvs_get_u32(nvsHandle, "espresso_sat", &espressoPriceSats);
+    nvs_get_u32(nvsHandle, "coffee_sat", &coffeePriceSats);
+    return loadGatewayConfig();
 }
 
 bool ConfigManager::save()
 {
     if (!initialized)
+    {
         return false;
+    }
 
-    // Save all values to NVS
-    esp_err_t err;
-
-    // Save strings
-    err = nvs_set_str(nvsHandle, "lnbits_server", lnbitsServer);
-    if (err != ESP_OK)
+    if (nvs_set_u32(nvsHandle, "espresso_sat", espressoPriceSats) != ESP_OK ||
+        nvs_set_u32(nvsHandle, "coffee_sat", coffeePriceSats) != ESP_OK ||
+        nvs_commit(nvsHandle) != ESP_OK)
+    {
         return false;
+    }
 
-    err = nvs_set_str(nvsHandle, "device_id", deviceId);
-    if (err != ESP_OK)
-        return false;
-
-    err = nvs_set_str(nvsHandle, "button1_lnurl", button1Lnurl);
-    if (err != ESP_OK)
-        return false;
-
-    err = nvs_set_str(nvsHandle, "button2_lnurl", button2Lnurl);
-    if (err != ESP_OK)
-        return false;
-
-    err = nvs_commit(nvsHandle);
-    if (err != ESP_OK)
-        return false;
-
-    log_i("Configuration saved");
-    return true;
+    return saveGatewayConfig();
 }
 
 bool ConfigManager::reset()
 {
     if (!initialized)
     {
-        log_e("Cannot reset: not initialized");
         return false;
     }
 
-    // Erase all keys in our namespace
-    esp_err_t err = nvs_erase_all(nvsHandle);
-    if (err != ESP_OK)
+    if (nvs_erase_all(nvsHandle) != ESP_OK || nvs_commit(nvsHandle) != ESP_OK)
     {
-        log_e("Error erasing NVS: %s", esp_err_to_name(err));
         return false;
     }
 
-    // Commit changes to NVS
-    err = nvs_commit(nvsHandle);
-    if (err != ESP_OK)
-    {
-        log_e("Error committing NVS reset: %s", esp_err_to_name(err));
-        return false;
-    }
-
-    // Reset values to defaults
     setDefaultValues();
+    return resetGatewayConfig();
+}
 
-    log_i("Configuration reset to defaults");
+bool ConfigManager::getGatewayNamespace(char *buffer, size_t size) const
+{
+    if (paymentGateway == nullptr)
+    {
+        return false;
+    }
+
+    int written = snprintf(buffer, size, "pay_%s", paymentGateway->getId());
+    return written > 0 && static_cast<size_t>(written) < size && written <= 15;
+}
+
+bool ConfigManager::loadGatewayConfig()
+{
+    char configNamespace[16];
+    if (!getGatewayNamespace(configNamespace, sizeof(configNamespace)))
+    {
+        return paymentGateway == nullptr;
+    }
+
+    nvs_handle_t gatewayHandle;
+    if (nvs_open(configNamespace, NVS_READONLY, &gatewayHandle) != ESP_OK)
+    {
+        return true;
+    }
+
+    for (size_t index = 0; index < paymentGateway->getConfigFieldCount(); ++index)
+    {
+        const PaymentConfigField &field = paymentGateway->getConfigField(index);
+        if (strlen(field.key) > 15)
+        {
+            continue;
+        }
+
+        size_t requiredSize = 0;
+        if (nvs_get_str(gatewayHandle, field.key, nullptr, &requiredSize) != ESP_OK ||
+            requiredSize > field.maxLength + 1)
+        {
+            continue;
+        }
+
+        char *value = new char[requiredSize];
+        if (nvs_get_str(gatewayHandle, field.key, value, &requiredSize) == ESP_OK)
+        {
+            paymentGateway->setConfigValue(index, value);
+        }
+        delete[] value;
+    }
+
+    nvs_close(gatewayHandle);
     return true;
 }
 
-void ConfigManager::setLNBitsServer(const char *server)
+bool ConfigManager::saveGatewayConfig()
 {
-    if (server == nullptr)
+    char configNamespace[16];
+    if (!getGatewayNamespace(configNamespace, sizeof(configNamespace)))
     {
-        log_w("Attempt to set null LNBits server");
-        return;
+        return paymentGateway == nullptr;
     }
 
-    if (strlen(server) >= sizeof(lnbitsServer))
+    nvs_handle_t gatewayHandle;
+    if (nvs_open(configNamespace, NVS_READWRITE, &gatewayHandle) != ESP_OK)
     {
-        log_e("LNBits server string too long (max %d chars)", sizeof(lnbitsServer) - 1);
-        return;
+        return false;
     }
 
-    strcpy(lnbitsServer, server);
-    log_i("LNBits server set to: %s", server);
+    bool success = true;
+    for (size_t index = 0; index < paymentGateway->getConfigFieldCount(); ++index)
+    {
+        const PaymentConfigField &field = paymentGateway->getConfigField(index);
+        if (strlen(field.key) > 15 ||
+            nvs_set_str(gatewayHandle, field.key, paymentGateway->getConfigValue(index)) != ESP_OK)
+        {
+            success = false;
+            break;
+        }
+    }
+
+    success = success && nvs_commit(gatewayHandle) == ESP_OK;
+    nvs_close(gatewayHandle);
+    return success;
 }
 
-void ConfigManager::setDeviceId(const char *id)
+bool ConfigManager::resetGatewayConfig()
 {
-    if (id == nullptr)
+    char configNamespace[16];
+    if (!getGatewayNamespace(configNamespace, sizeof(configNamespace)))
     {
-        log_w("Attempt to set null device ID");
-        return;
+        return paymentGateway == nullptr;
     }
 
-    if (strlen(id) >= sizeof(deviceId))
+    nvs_handle_t gatewayHandle;
+    if (nvs_open(configNamespace, NVS_READWRITE, &gatewayHandle) != ESP_OK)
     {
-        log_e("Device ID string too long (max %d chars)", sizeof(deviceId) - 1);
-        return;
+        return false;
     }
 
-    strcpy(deviceId, id);
-    log_i("Device ID set to: %s", id);
-}
-
-void ConfigManager::setButtonLnurl(const uint8_t buttonNumber, const char *lnurl)
-{
-    if (lnurl == nullptr)
-    {
-        log_w("Attempt to set null Button %d Lnurl", buttonNumber);
-        return;
-    }
-
-    if (strlen(lnurl) >= sizeof(lnurl))
-    {
-        log_e("Button %d Lnurl string too long (max %d chars)", buttonNumber, sizeof(lnurl) - 1);
-        return;
-    }
-
-    if (buttonNumber == 1)
-    {
-        strcpy(button1Lnurl, lnurl);
-    }
-    else if (buttonNumber == 2)
-    {
-        strcpy(button2Lnurl, lnurl);
-    }
-    else
-    {
-        log_e("Trying to set Button Lnurl for invalid button %d", buttonNumber);
-        return;
-    }
-
-    log_i("Button %d Lnurl set to: %s", buttonNumber, lnurl);
+    bool success = nvs_erase_all(gatewayHandle) == ESP_OK &&
+                   nvs_commit(gatewayHandle) == ESP_OK;
+    nvs_close(gatewayHandle);
+    return success;
 }

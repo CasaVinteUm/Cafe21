@@ -36,7 +36,11 @@ void setup()
   log_i("'q' - Set Quantity");
 #endif
 
+#ifdef DISPLAY_WIDTH
+  if (!configManager.begin(&paymentGateway))
+#else
   if (!configManager.begin())
+#endif
   {
     log_e("Failed to initialize config manager");
     delay(3000);
@@ -54,10 +58,10 @@ void setup()
 
   log_i("WiFi connected.");
 
-  lightningController.websocketInit();
-
   coffeeTask.begin();
+#ifdef DISPLAY_WIDTH
   uiController.begin();
+#endif
 }
 
 void loop()
@@ -66,40 +70,29 @@ void loop()
     return;
   wifiManager.process();
 
-  lightningController.websocketLoop();
+#ifdef DISPLAY_WIDTH
   vTaskDelay(uiController.getDelayLvgl() + 1 / portTICK_PERIOD_MS);
+#else
+  vTaskDelay(1);
+#endif
 }
 
 /// -------------------------------------
 ///             UI EVENTS
 /// -------------------------------------
 
+#ifdef DISPLAY_WIDTH
+
 void chooseButton1Clicked(lv_event_t *e)
 {
-  uiController.setWaitingPaymentFor(1);
-  coffeeController.selectCoffee(CoffeeType::ESPRESSO);
-  _ui_screen_change(&ui_payment, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_payment_screen_init);
-
-  lv_timer_create([](lv_timer_t *timer)
-                  {
-                    uiController.generateQrCode(1);
-                    lv_timer_del(timer); // Delete the timer after use
-                  },
-                  100, nullptr); // 100ms delay
+  uiController.requestCoffee(
+      1, CoffeeType::ESPRESSO, configManager.getEspressoPriceSats(), "Espresso");
 }
 
 void chooseButton2Clicked(lv_event_t *e)
 {
-  uiController.setWaitingPaymentFor(2);
-  coffeeController.selectCoffee(CoffeeType::COFFEE);
-  _ui_screen_change(&ui_payment, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_payment_screen_init);
-
-  lv_timer_create([](lv_timer_t *timer)
-                  {
-                    uiController.generateQrCode(2);
-                    lv_timer_del(timer); // Delete the timer after use
-                  },
-                  100, nullptr); // 100ms delay
+  uiController.requestCoffee(
+      2, CoffeeType::COFFEE, configManager.getCoffeePriceSats(), "Coffee");
 }
 
 void chooseBackButtonClicked(lv_event_t *e)
@@ -110,9 +103,8 @@ void chooseBackButtonClicked(lv_event_t *e)
 
 void paymentBackButtonClicked(lv_event_t *e)
 {
-  coffeeController.selectCoffee(CoffeeType::NONE);
+  uiController.cancelPayment();
   _ui_screen_change(&ui_choose, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_choose_screen_init);
-  uiController.clearQrCode();
 }
 
 void preparingCancelButtonClicked(lv_event_t *e)
@@ -138,16 +130,12 @@ void homeConfigClicked(lv_event_t *e)
 
 void configButtonEspressoClicked(lv_event_t *e)
 {
-  uiController.setWaitingPaymentFor(1);
-  coffeeController.selectCoffee(CoffeeType::ESPRESSO);
-  uiController.onInvoicePaid(1);
+  uiController.startFreeOrder(1, CoffeeType::ESPRESSO);
 }
 
 void configButtonCoffeeClicked(lv_event_t *e)
 {
-  uiController.setWaitingPaymentFor(2);
-  coffeeController.selectCoffee(CoffeeType::COFFEE);
-  uiController.onInvoicePaid(2);
+  uiController.startFreeOrder(2, CoffeeType::COFFEE);
 }
 
 void configButtonRestartClicked(lv_event_t *e)
@@ -211,3 +199,5 @@ void configPasswordKeyboardValueChanged(lv_event_t *e)
     }
   }
 }
+
+#endif // DISPLAY_WIDTH

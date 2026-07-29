@@ -1,6 +1,6 @@
 # Cafe Vinteum
 
-This project transforms a **Philips Walita Coffee Machine (EP1220)** into a smart coffee dispenser that accepts **Bitcoin Lightning Network** payments. By replacing the original control panel with an ESP32 development board featuring a display and touch interface, users can purchase coffee seamlessly using Lightning payments.
+This project transforms a **Philips Walita Coffee Machine (EP1220)** into a smart coffee dispenser with a replaceable payment-gateway interface. By replacing the original control panel with an ESP32 development board featuring a display and touch interface, users can select and purchase coffee directly on the machine. No production payment gateway is bundled yet.
 
 ## Table of Contents
 
@@ -15,7 +15,7 @@ This project transforms a **Philips Walita Coffee Machine (EP1220)** into a smar
   - [Hardware Setup](#hardware-setup)
   - [Firmware Installation](#firmware-installation)
 - [Usage](#usage)
-- [LNBits Integration](#lnbits-integration)
+- [Payment Gateways](#payment-gateways)
 - [Help Wanted](#help-wanted)
 - [Contributing](#contributing)
 - [Acknowledgments](#acknowledgments)
@@ -24,7 +24,7 @@ This project transforms a **Philips Walita Coffee Machine (EP1220)** into a smar
 
 ## Introduction
 
-**Cafe Vinteum** aims to modernize the coffee experience by integrating cryptocurrency payments directly into a popular coffee machine model. This project is ideal for tech enthusiasts, coffee lovers, and anyone interested in the practical applications of the Lightning Network.
+**Cafe Vinteum** aims to modernize the coffee experience by integrating configurable payments directly into a popular coffee machine model. This project is ideal for embedded developers, coffee lovers, and payment-integration contributors.
 
 ## Disclaimer
 
@@ -34,7 +34,7 @@ Be advised that **CasaVinteUm** will not be held responsible for any damage to p
 
 ## Features
 
-- **Lightning Payments**: Accepts payments via the Bitcoin Lightning Network.
+- **Pluggable Payments**: Uses a provider-neutral interface for future payment integrations.
 - **Touchscreen Interface**: User-friendly navigation and coffee selection.
 - **Wi-Fi Connectivity**: Easy network setup using WiFiManager.
 - **Customizable UI**: Built with LVGL and SquareLine Studio for flexibility.
@@ -72,7 +72,7 @@ We utilize several open-source libraries and tools:
 - [LVGL](https://lvgl.io): Powerful graphics library for embedded systems.
 - [SquareLine Studio](https://squareline.io): Design tool for creating UI interfaces (free for personal use).
 - [WiFiManager](https://github.com/tzapu/WiFiManager): Simplifies Wi-Fi configuration on the ESP32.
-- [WebSockets](https://github.com/links2004/WebSockets): Enables real-time communication via WebSockets.
+- **Payment Gateway Interface**: Decouples checkout from provider-specific implementations.
 - [ESP32 Smart Display](https://github.com/rzeldent/esp32_smartdisplay): Facilitates smart display functionalities.
 - [ESP32 Partition Tool](https://esp32.jgarrettcorbin.com): Creates custom partition tables for more storage.
 - [SquareLine Studio Boards](https://github.com/nGoline/squarelinestudio-boards): Board definitions for SquareLine Studio.
@@ -147,44 +147,28 @@ We utilize several open-source libraries and tools:
    - Connect to this AP using a smartphone or laptop.
    - Follow the captive portal to input your Wi-Fi credentials.
 
-3. **Connect to LNBits**:
-   - Configure the LNBits integration (see [LNBits Integration](#lnbits-integration)).
+3. **Configure payments**:
+   - Set product prices and gateway-specific fields in the captive portal.
+   - A price of `0` makes that product free and skips checkout.
 
 4. **Using the Touch Interface**:
    - Select your preferred coffee type on the touchscreen.
    - A QR code will appear for payment.
 
 5. **Make a Payment**:
-   - Use a Lightning-compatible wallet to scan the QR code.
-   - Upon successful payment, the machine will brew your coffee.
+   - Use the wallet or client supported by the configured gateway.
+   - Upon successful confirmation, the machine will brew your coffee.
 
-## LNBits Integration
+## Payment Gateways
 
-We use [LNBits](https://lnbits.com) and its **LNURLDevice** extension to handle Lightning payments.
+Payment handling is defined by the `IPaymentGateway` interface. Providers own
+their settings while exposing the same asynchronous invoice and confirmation
+flow to the application.
 
-### Setup Instructions
-
-1. **Install LNBits**:
-   - You can self-host LNBits or use a hosted instance.
-   - Follow the official [LNBits installation guide](https://docs.lnbits.com/guide/installation.html).
-
-2. **Enable LNURLDevice Extension**:
-   - In LNBits, navigate to the Extensions page.
-   - Enable and set up the LNURLDevice extension.
-
-3. **Create a new device**:
-   - Choose the option Switch;
-   - Click the plus(+) button twice to add two configurations;
-   - Set the price for Espresso and Coffee, respectivelly;
-   - Set the duration and GPIO pin for the **Espresso** as `1` and `1`.
-   - Set the duration and GPIO pin for the **Coffee** as `2` and `2`.
-
-4. **Update Firmware Configuration**:
-   - In your ESP32 code, update the LNBits API endpoint and LNURLs for each beverage.
-   - You can also set this up on the captive portal during first boot.
-
-5. **Test the Connection**:
-   - Trigger a test payment to ensure the system works end-to-end.
+The repository currently includes only `DummyPaymentGateway`. Normal builds
+report paid checkout as unavailable. The `esp32-8048S043C-dummy` environment
+enables a development demonstration that displays a fake QR payload and
+confirms it automatically. Never deploy that environment in production.
 
 ## Help Wanted
 

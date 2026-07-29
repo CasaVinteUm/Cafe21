@@ -1,11 +1,16 @@
 #include "UIController.h"
 
-UIController::UIController(CoffeeMachineController &coffeeCtrl, LightningController &lightCtrl)
-    : coffeeController(coffeeCtrl), lightningController(lightCtrl) {}
+UIController::UIController(CoffeeMachineController &coffeeCtrl, IPaymentGateway &gateway)
+    : coffeeController(coffeeCtrl), paymentGateway(gateway) {}
 
 void UIController::begin()
 {
-    lightningController.setOnInvoicePaid(std::bind(&UIController::onInvoicePaid, this, std::placeholders::_1));
+    paymentGateway.setEventCallback([this](const PaymentEvent &event)
+                                    { onPaymentEvent(event); });
+    if (!paymentGateway.begin())
+    {
+        log_e("Failed to initialize payment gateway");
+    }
 
     // Initialize SmartDisplay
     smartdisplay_init();
@@ -49,12 +54,10 @@ void UIController::run()
 
     while (true)
     {
-        if (lightningController.getIsConnected())
+        paymentGateway.loop();
+        CoffeeMachineError currentError = coffeeController.getCurrentError();
+        switch (coffeeController.getCurrentState())
         {
-            // Handle UI state
-            CoffeeMachineError currentError = coffeeController.getCurrentError();
-            switch (coffeeController.getCurrentState())
-            {
             case CoffeeMachineState::Off:
                 coffeeController.sendOnCommand();
                 lv_obj_clear_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
@@ -152,16 +155,6 @@ void UIController::run()
                 lv_obj_clear_flag(ui_homeErrorSubTitle, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
                 break;
-            }
-        }
-        else
-        {
-            lv_obj_clear_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(ui_homeButton, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(ui_homeSubTitle, LV_OBJ_FLAG_HIDDEN);
-            lv_img_set_src(ui_homeErrorIcon, &ui_img_wifi_png);
-            lv_label_set_text(ui_homeErrorTitle, "Conectando ao WiFi e LNBits...");
-            lv_label_set_text(ui_homeErrorSubTitle, "Aguarde...\n");
         }
 
         delayLvgl = lv_timer_handler();
@@ -169,49 +162,117 @@ void UIController::run()
     }
 }
 
-void UIController::setWaitingPaymentFor(uint8_t type)
+void UIController::requestCoffee(uint8_t productId, CoffeeType type, uint32_t amountSats, const char *description)
 {
-    if (type != 1 && type != 2)
+    if (productId != 1 && productId != 2)
     {
-        log_e("Type %d is unknown", type);
+        log_e("Product %d is unknown", productId);
         return;
     }
 
-    waitingPaymentFor = type;
+    coffeeController.selectCoffee(type);
+    waitingPaymentFor = productId;
+
+    if (amountSats == 0)
+    {
+        completeOrder(productId);
+        return;
+    }
+
+    _ui_screen_change(&ui_payment, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_payment_screen_init);
+    lv_label_set_text(ui_paymentTitle, "Criando pagamento...");
+    lv_label_set_text(ui_paymentSubtitle, "Aguarde...\n");
+
+    if (!paymentGateway.isAvailable())
+    {
+        showPaymentError("Pagamento indisponível");
+        return;
+    }
+
+    if (!paymentGateway.requestPayment({productId, amountSats, description}))
+    {
+        showPaymentError("Não foi possível criar o pagamento");
+    }
 }
 
-void UIController::onInvoicePaid(uint8_t type)
+void UIController::startFreeOrder(uint8_t productId, CoffeeType type)
 {
-    if (waitingPaymentFor == type)
+    coffeeController.selectCoffee(type);
+    waitingPaymentFor = productId;
+    completeOrder(productId);
+}
+
+void UIController::onPaymentEvent(const PaymentEvent &event)
+{
+    if (event.productId != waitingPaymentFor)
     {
+        return;
+    }
+
+    switch (event.type)
+    {
+    case PaymentEventType::InvoiceReady:
+        qrData = event.paymentUri;
+        lv_label_set_text(ui_paymentTitle, "Pague seu Café");
+        lv_label_set_text(ui_paymentSubtitle, "Escaneie o QR Code");
+        generateQrCode();
+        break;
+    case PaymentEventType::Confirmed:
+        completeOrder(event.productId);
+        break;
+    case PaymentEventType::Cancelled:
         waitingPaymentFor = 0;
-        if (type == 1)
-        {
-            lv_img_set_src(ui_preparingImage, &ui_img_espresso_png);
-            lv_label_set_text(ui_homeErrorTitle, "Minerando seu\nEspresso To The Moon");
-        }
-        else
-        {
-            lv_img_set_src(ui_preparingImage, &ui_img_coffee_png);
-            lv_label_set_text(ui_homeErrorTitle, "Minerando seu\nBlock Coffee");
-        }
-        _ui_screen_change(&ui_preparing, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_preparing_screen_init);
         clearQrCode();
-        coffeeController.startOrder();
+        break;
+    case PaymentEventType::Expired:
+        showPaymentError("Pagamento expirado");
+        break;
+    case PaymentEventType::Failed:
+        showPaymentError(event.error.length() ? event.error.c_str() : "Falha no pagamento");
+        break;
+    }
+}
+
+void UIController::completeOrder(uint8_t productId)
+{
+    if (waitingPaymentFor != productId)
+    {
+        return;
+    }
+
+    waitingPaymentFor = 0;
+    if (productId == 1)
+    {
+        lv_img_set_src(ui_preparingImage, &ui_img_espresso_png);
     }
     else
     {
-        log_i("Invoice paid for: %d", type);
-        return;
+        lv_img_set_src(ui_preparingImage, &ui_img_coffee_png);
     }
+
+    _ui_screen_change(&ui_preparing, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_preparing_screen_init);
+    clearQrCode();
+    coffeeController.startOrder();
 }
 
-void UIController::showQrCode(uint8_t buttonNumber, lv_coord_t size)
+void UIController::cancelPayment()
 {
-    // Create and update QR code
-    log_d("Generating QRCode for button %d. %s", buttonNumber, buttonNumber == 1 ? lightningController.getButton1Lnurl() : lightningController.getButton2Lnurl());
+    paymentGateway.cancelPayment();
+    waitingPaymentFor = 0;
+    qrData = "";
+    clearQrCode();
+    coffeeController.selectCoffee(CoffeeType::NONE);
+}
+
+void UIController::showPaymentError(const char *message)
+{
+    lv_label_set_text(ui_paymentTitle, message);
+    lv_label_set_text(ui_paymentSubtitle, "Volte e tente novamente.");
+}
+
+void UIController::showQrCode(lv_coord_t size)
+{
     auto ui_qrcode = lv_qrcode_create(ui_qrCodeContainer, size ? size : QRCODE_INITIAL_SIZE, lv_color_black(), lv_color_white());
-    String qrData = buttonNumber == 1 ? lightningController.getButton1Lnurl() : lightningController.getButton2Lnurl();
     lv_qrcode_update(ui_qrcode, qrData.c_str(), qrData.length());
     lv_obj_center(ui_qrcode);
 }
@@ -226,7 +287,7 @@ void UIController::qrCodeTimerCallback(lv_timer_t *timer)
 
     if (instance->qrCodeSize > QRCODE_INITIAL_SIZE)
     {
-        instance->showQrCode(instance->timerButtonNumber, instance->qrCodeSize);
+        instance->showQrCode(instance->qrCodeSize);
         lv_timer_del(timer);
     }
     else
@@ -239,21 +300,17 @@ void UIController::qrCodeTimerCallback(lv_timer_t *timer)
     }
 }
 
-void UIController::generateQrCode(uint8_t buttonNumber)
+void UIController::generateQrCode()
 {
     if (qrCodeSize <= QRCODE_INITIAL_SIZE)
     {
         // Allocate and initialize timer data
         startTime = millis();
-        timerButtonNumber = buttonNumber;
-
-        // Create a one-shot timer that will generate the QR code after the screen is loaded
-        // Create timer that will generate the QR code after the screen is loaded
         __attribute__((unused)) lv_timer_t *timer = lv_timer_create(qrCodeTimerCallback, 100, this); // 100ms interval
     }
     else
     {
-        showQrCode(buttonNumber, qrCodeSize);
+        showQrCode(qrCodeSize);
     }
 }
 
