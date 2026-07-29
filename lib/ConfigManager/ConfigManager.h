@@ -2,42 +2,41 @@
 #define CONFIGMANAGER_H
 
 #include <Arduino.h>
-#include <nvs_flash.h>
 #include <nvs.h>
-#include "esp_log.h"
+#include <nvs_flash.h>
+
+#include <PaymentGateway.h>
 
 class ConfigManager
 {
-private:
-    static const char *NVS_NAMESPACE;
-    nvs_handle_t nvsHandle;
-    bool initialized;
-
-    // Configuration values
-    char lnbitsServer[100];
-    char deviceId[23];
-    char button1Lnurl[256];
-    char button2Lnurl[256];
-
-    void setDefaultValues();
-
 public:
     ConfigManager();
-    bool begin();
+
+    bool begin(IPaymentGateway *gateway = nullptr);
     bool load();
     bool save();
     bool reset();
 
-    // Getters
-    const char *getLNBitsServer() const { return lnbitsServer; }
-    const char *getDeviceId() const { return deviceId; }
-    const char *getButton1Lnurl() const { return button1Lnurl; }
-    const char *getButton2Lnurl() const { return button2Lnurl; }
+    uint32_t getEspressoPriceSats() const { return espressoPriceSats; }
+    uint32_t getCoffeePriceSats() const { return coffeePriceSats; }
 
-    // Setters
-    void setLNBitsServer(const char *server);
-    void setDeviceId(const char *id);
-    void setButtonLnurl(const uint8_t buttonNumber, const char *lnurl);
+    void setEspressoPriceSats(uint32_t price) { espressoPriceSats = price; }
+    void setCoffeePriceSats(uint32_t price) { coffeePriceSats = price; }
+
+private:
+    static const char *NVS_NAMESPACE;
+
+    nvs_handle_t nvsHandle;
+    IPaymentGateway *paymentGateway;
+    bool initialized;
+    uint32_t espressoPriceSats;
+    uint32_t coffeePriceSats;
+
+    void setDefaultValues();
+    bool loadGatewayConfig();
+    bool saveGatewayConfig();
+    bool resetGatewayConfig();
+    bool getGatewayNamespace(char *buffer, size_t size) const;
 };
 
 #endif // CONFIGMANAGER_H

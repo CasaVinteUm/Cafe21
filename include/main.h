@@ -20,7 +20,7 @@
 #ifdef DISPLAY_WIDTH
 
 #include <ui.h>
-#include <LightningController.h>
+#include <DummyPaymentGateway.h>
 #include <UIController.h>
 
 #endif // DISPLAY_WIDTH
@@ -29,11 +29,13 @@ MessageLogger logger;
 CoffeeMachineMessage currentMessage;
 
 ConfigManager configManager;
-WiFiManagerWrapper wifiManager(configManager);
 bool initialized;
 
 #ifdef DISPLAY_WIDTH
-LightningController lightningController(configManager);
+DummyPaymentGateway paymentGateway;
+WiFiManagerWrapper wifiManager(configManager, &paymentGateway);
+#else
+WiFiManagerWrapper wifiManager(configManager);
 #endif // DISPLAY_WIDTH
 
 #ifdef ESP32C3
@@ -55,7 +57,7 @@ CoffeeMachineController coffeeController(CoffeeSerial, logger);
 CoffeeControllerTask coffeeTask(coffeeController);
 
 #ifdef DISPLAY_WIDTH
-UIController uiController(coffeeController, lightningController);
+UIController uiController(coffeeController, paymentGateway);
 #endif // DISPLAY_WIDTH
 
 #endif // MAIN_H
