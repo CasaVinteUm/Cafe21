@@ -154,7 +154,7 @@ void UIController::run()
                 break;
             }
         }
-        else
+        else if (isInitialized)
         {
             lv_obj_clear_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
             lv_obj_add_flag(ui_homeButton, LV_OBJ_FLAG_HIDDEN);
@@ -162,6 +162,15 @@ void UIController::run()
             lv_img_set_src(ui_homeErrorIcon, &ui_img_wifi_png);
             lv_label_set_text(ui_homeErrorTitle, "Conectando ao WiFi e LNBits...");
             lv_label_set_text(ui_homeErrorSubTitle, "Aguarde...\n");
+        }
+        else
+        {
+            lv_obj_clear_flag(ui_homeErrorPanel, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ui_homeButton, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ui_homeSubTitle, LV_OBJ_FLAG_HIDDEN);
+            lv_img_set_src(ui_homeErrorIcon, &ui_img_wifi_png);
+            lv_label_set_text(ui_homeErrorTitle, "Já configurou sua máquina café?");
+            lv_label_set_text(ui_homeErrorSubTitle, "Por favor, aguarde alguns segundos ou conecte-se ao AP para ajustar as configurações iniciais.");
         }
 
         delayLvgl = lv_timer_handler();
